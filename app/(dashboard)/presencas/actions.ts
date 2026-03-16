@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { calcularFrequencia, calcularSituacao } from "@/lib/utils/frequencia";
+import { enviarAlertaFrequencia } from "@/lib/email/alertaFrequencia";
 
 const registroSchema = z.object({
   alunoId: z.string(),
@@ -52,7 +53,7 @@ export async function salvarChamada(input: {
 async function recalcularAlertas(alunoIds: string[]) {
   const alunos = await prisma.aluno.findMany({
     where: { id: { in: alunoIds } },
-    include: { presencas: true },
+    include: { presencas: true, turma: true },
   });
 
   await Promise.all(
@@ -60,13 +61,19 @@ async function recalcularAlertas(alunoIds: string[]) {
       const percentual = calcularFrequencia(aluno.presencas);
       const situacao = calcularSituacao(percentual);
 
+      // Irregular e alerta ainda não enviado: envia e-mail e marca como enviado
       if (situacao === "Irregular" && !aluno.alertaEnviado) {
-        // Alerta será disparado pela Fase 6
+        await enviarAlertaFrequencia(aluno, percentual).catch((err) =>
+          console.error(`Erro ao enviar alerta para ${aluno.emailResponsavel}:`, err)
+        );
         await prisma.aluno.update({
           where: { id: aluno.id },
           data: { alertaEnviado: true },
         });
-      } else if (situacao === "Regular" && aluno.alertaEnviado) {
+      }
+
+      // Voltou a ser regular: reseta flag para permitir novo alerta no futuro
+      if (situacao === "Regular" && aluno.alertaEnviado) {
         await prisma.aluno.update({
           where: { id: aluno.id },
           data: { alertaEnviado: false },
