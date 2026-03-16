@@ -2,7 +2,11 @@ import type { StatusPresenca } from "@prisma/client";
 
 type PresencaMinima = { status: StatusPresenca };
 
-// PRESENTE e ATRASADO contam como presença; AUSENTE não conta
+/**
+ * Calcula o percentual de frequência de um aluno.
+ * Regra: PRESENTE e ATRASADO contam como presença; AUSENTE não conta.
+ * Aluno sem registros é tratado como 100% para não aparecer como irregular.
+ */
 export function calcularFrequencia(presencas: PresencaMinima[]): number {
   if (presencas.length === 0) return 100;
 
@@ -13,7 +17,10 @@ export function calcularFrequencia(presencas: PresencaMinima[]): number {
   return Math.round((presentes / presencas.length) * 100);
 }
 
-// Limiar: 75%
+/**
+ * Determina a situação do aluno com base no percentual de frequência.
+ * Limiar mínimo: 75% (abaixo disso = Irregular, sujeito a reprovação por falta).
+ */
 export function calcularSituacao(percentual: number): "Regular" | "Irregular" {
   return percentual >= 75 ? "Regular" : "Irregular";
 }
