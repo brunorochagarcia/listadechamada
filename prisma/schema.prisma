@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Turma {
+  id         String     @id @default(cuid())
+  nome       String
+  turno      Turno
+  anoLetivo  String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  alunos     Aluno[]
+  presencas  Presenca[]
+}
+
+model Aluno {
+  id                 String     @id @default(cuid())
+  nome               String
+  matricula          String     @unique
+  turmaId            String
+  emailResponsavel   String
+  fotoUrl            String?
+  fotoPublicId       String?
+  alertaEnviado      Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  turma              Turma      @relation(fields: [turmaId], references: [id])
+  presencas          Presenca[]
+}
+
+model Presenca {
+  id        String         @id @default(cuid())
+  alunoId   String
+  turmaId   String
+  data      DateTime       @db.Date
+  status    StatusPresenca
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  aluno     Aluno          @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  turma     Turma          @relation(fields: [turmaId], references: [id])
+
+  @@unique([alunoId, data, turmaId])
+}
+
+enum Role {
+  ADMIN
+}
+
+enum Turno {
+  MANHA
+  TARDE
+  NOITE
+}
+
+enum StatusPresenca {
+  PRESENTE
+  AUSENTE
+  ATRASADO
+}

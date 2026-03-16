@@ -1,0 +1,194 @@
+Now use the PRD to create a TO DO list to make the whole project, from begginging to end. Show me this document
+
+  TODO — Lista de Chamada (do zero ao deploy)                                                                                                                                                                                                 
+   
+  ---                                                                                                                                                                                                                                         
+  FASE 1 — Fundação e Infraestrutura                        
+
+  1.1 Configuração de Ambiente
+
+  - Configurar variáveis de ambiente em .env (DATABASE_URL, NEXTAUTH_SECRET, Cloudinary, Resend)
+  - Criar lib/env.ts — validação de variáveis com Zod, tipagem exportada
+  - Ajustar tsconfig.json para strict mode (verificar se já está ativo)
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir 
+
+  1.2 Banco de Dados
+
+  - Subir instância PostgreSQL local (Docker ou instalação direta)
+  - Confirmar conexão com DATABASE_URL no .env
+  - Executar npx prisma migrate dev --name init para criar as tabelas
+  - Verificar constraints no banco (unique em matrícula, unique em alunoId+data+turmaId)
+  - Criar prisma/seed.ts — seed do usuário admin (bcrypt na senha)
+  - Executar npx prisma db seed e confirmar usuário criado
+  - Criar lib/prisma.ts — singleton do PrismaClient
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+  1.3 Autenticação
+
+  - Configurar NextAuth com credentials provider em auth.ts
+  - Criar app/api/auth/[...nextauth]/route.ts
+  - Criar middleware.ts — proteger todas as rotas exceto /login
+  - Criar app/login/page.tsx + app/login/actions.ts (validação Zod + signIn)
+  - Testar login, redirecionamento e acesso negado sem sessão
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+  1.4 Layout Base
+
+  - Criar app/layout.tsx — fontes, SessionProvider, Toaster
+  - Criar components/Sidebar.tsx e components/Header.tsx
+  - Criar app/(dashboard)/layout.tsx — layout protegido com sidebar/header
+  - Instalar componentes shadcn: toast, button, input, select, dialog, badge, card, table
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+
+  ---
+  FASE 2 — Utilitários e Camada de Dados
+
+  - Criar lib/utils/frequencia.ts
+    - calcularFrequencia(presencas) → percentual (PRESENTE + ATRASADO contam)
+    - calcularSituacao(percentual) → "Regular" | "Irregular" (limiar 75%)
+  - Criar lib/api/turmas.ts — getTurmas(), getTurmaById(id)
+  - Criar lib/api/alunos.ts — getAlunos(search?), getAlunoById(id), getAlunoComPresencas(id)
+  - Criar lib/api/presencas.ts — getPresencasPorTurmaEData(), getHistoricoPresencas(filtros)
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+
+  ---
+  FASE 3 — Módulo de Turmas
+
+  - app/(dashboard)/turmas/page.tsx — listagem (RSC)
+  - app/(dashboard)/turmas/nova/page.tsx — formulário de criação
+  - app/(dashboard)/turmas/[id]/editar/page.tsx — formulário de edição
+  - app/(dashboard)/turmas/actions.ts
+    - criarTurma() — Zod + insert + revalidatePath
+    - editarTurma() — Zod + update + revalidatePath
+    - excluirTurma() — verificar vínculos + delete + revalidatePath
+  - components/ConfirmModal.tsx — modal de confirmação reutilizável
+  - Aplicar modal na exclusão; testar bloqueio com alunos vinculados
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+  ---
+  FASE 4 — Módulo de Alunos
+
+  - app/(dashboard)/alunos/page.tsx — listagem com busca (RSC)
+  - app/(dashboard)/alunos/novo/page.tsx — formulário de criação
+  - app/(dashboard)/alunos/[id]/editar/page.tsx — formulário de edição
+  - lib/cloudinary.ts — instância + funções de upload/delete
+  - app/(dashboard)/alunos/actions.ts
+    - criarAluno() — Zod + upload foto Cloudinary (opcional) + insert
+    - editarAluno() — Zod + troca de foto (remover anterior via publicId) + update
+    - excluirAluno() — remover foto do Cloudinary + delete
+  - components/AlunoCard.tsx
+  - Testar unicidade de matrícula com erro amigável via toast
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+
+  ---
+  FASE 5 — Módulo de Presenças
+
+  5.1 Registro de Chamada
+
+  - app/(dashboard)/presencas/page.tsx — seleção de data e turma
+  - components/PresencaForm.tsx
+    - Carrega alunos da turma selecionada
+    - Busca por nome/matrícula dentro da chamada
+    - Pré-popula se já existir chamada para data+turma
+    - Botões PRESENTE / AUSENTE / ATRASADO por aluno
+  - app/(dashboard)/presencas/actions.ts
+    - salvarChamada() — upsert de presenças (constraint evita duplicata)
+    - Após salvar: recalcular frequência e disparar e-mail se necessário
+  - components/StatusBadge.tsx — badge colorido por status
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+  5.2 Histórico
+
+  - app/(dashboard)/presencas/historico/page.tsx — listagem com filtros (RSC)
+  - components/FiltroPresenca.tsx — filtros por data, turma, status
+  - Implementar paginação
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+
+  ---
+  FASE 6 — Notificações por E-mail
+
+  - lib/email/resend.ts — cliente Resend configurado
+  - lib/email/alertaFrequencia.ts
+    - Template HTML do e-mail (nome, percentual, situação, orientações)
+    - Função enviarAlertaFrequencia(aluno, percentual)
+  - Integrar na salvarChamada:
+    - percentual < 75% + alertaEnviado === false → enviar + setar true
+    - percentual >= 75% + alertaEnviado === true → resetar para false
+  - Testar envio e controle de reenvio
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+
+  ---
+  FASE 7 — Dashboard
+
+  - app/(dashboard)/dashboard/page.tsx (RSC)
+    - Agrupar presenças do dia por turma → cards com totais
+    - Listar alunos Irregulares com destaque visual
+  - Definir /dashboard como rota raiz pós-login
+
+  ---
+  FASE 8 — Relatório Individual e Exportação
+
+  - app/(dashboard)/alunos/[id]/page.tsx — dados + histórico + percentual + badge de situação
+  - components/ExportButtons.tsx — botões PDF e CSV
+  - app/api/relatorio/[id]/csv/route.ts — gerar CSV com papaparse + Content-Disposition
+  - lib/export/pdf.ts — layout com @react-pdf/renderer
+  - app/api/relatorio/[id]/pdf/route.ts — renderToBuffer + application/pdf
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+
+  ---
+  FASE 9 — Qualidade e Polimento
+
+  - loading.tsx nas rotas principais
+  - error.tsx nas rotas principais
+  - not-found.tsx para aluno/turma inexistentes
+  - Revisar mensagens de erro inline + toasts em todos os formulários
+  - Responsividade mobile (sidebar em telas pequenas)
+  - Comentários nos trechos complexos (frequencia.ts, salvarChamada, alertaFrequencia)
+  - Revisar todos os revalidatePath
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+
+  ---
+  FASE 10 — Deploy
+
+  - Push para repositório GitHub
+  - Criar projeto na Vercel e conectar ao repo
+  - Configurar variáveis de ambiente na Vercel
+  - Provisionar PostgreSQL em produção (Neon, Supabase ou Railway)
+  - prisma migrate deploy + seed em produção
+  - Validar domínio no Resend
+  - Testar fluxo completo em produção
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
+  ---
+  Sequência de Dependências
+
+  ┌──────────────────────┬────────────┐
+  │         Fase         │ Depende de │
+  ├──────────────────────┼────────────┤
+  │ 1 — Fundação         │ —          │
+  ├──────────────────────┼────────────┤
+  │ 2 — Utilitários      │ 1          │
+  ├──────────────────────┼────────────┤
+  │ 3 — Turmas           │ 1, 2       │
+  ├──────────────────────┼────────────┤
+  │ 4 — Alunos           │ 1, 2, 3    │
+  ├──────────────────────┼────────────┤
+  │ 5 — Presenças        │ 1, 2, 3, 4 │
+  ├──────────────────────┼────────────┤
+  │ 6 — E-mail           │ 5          │
+  ├──────────────────────┼────────────┤
+  │ 7 — Dashboard        │ 5          │
+  ├──────────────────────┼────────────┤
+  │ 8 — Relatório/Export │ 4, 5       │
+  ├──────────────────────┼────────────┤
+  │ 9 — Polimento        │ 3→8        │
+  ├──────────────────────┼────────────┤
+  │ 10 — Deploy          │ 9          │
+
