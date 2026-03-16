@@ -1,0 +1,29 @@
+Feedback do Prompt 01
+
+11. Pontos em Aberto / Decisões Pendentes
+
+  ┌──────┬──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  #   │                                               Questão                                                │
+  ├──────┼──────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ P-01 │ Turma como string simples ou entidade própria no banco (com CRUD separado)?                          │
+  ├──────┼──────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ P-02 │ O sistema enviará e-mails em quais situações? (ex: aluno abaixo de 75%, notificação ao responsável?) │
+  ├──────┼──────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ P-03 │ Existe necessidade de múltiplos usuários/professores ou permanece sessão única de admin?             │
+  ├──────┼──────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ P-04 │ A busca de alunos no registro de chamada é pelo nome ou a lista é pré-carregada por turma?           │
+  ├──────┼──────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ P-05 │ Relatório individual será exportável (PDF/CSV) ou apenas visualização na web?                        │
+  └──────┴──────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  12. Fora de Escopo (v1)
+
+  - App mobile nativo
+  - Múltiplos perfis de acesso (coordenador, diretor, responsável)
+  - Integração com sistemas externos de gestão escolar
+  - Notificações push
+  - Importação em lote de alunos via CSV
+
+Respostas
+p01 - Entidade própria no banco, p02 aluno abaixo de 75% com email aos responsáveis; p03 apenas um usuário por enquanto, possibilidade de mais no futuro; p04 ambos; p05exportável

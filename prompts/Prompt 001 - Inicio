@@ -1,0 +1,78 @@
+Prompt: Avalie aas condições abaixo para a exlaboração de um aplicativo e organize em um formato de PRD para revisão, não usar taskmaster
+
+
+# Programa: Aplicativo Web de Controle de Presença para Escola
+
+## Contexto e Papel
+Atue como um desenvolvedor de sistemas Sênior com ampla experiência em Next.js, TypeScript, Prisma e arquitetura de aplicações SaaS. Você está desenvolvendo do zero um aplicativo web completo de controle de presença para uma escola, seguindo boas práticas de código, segurança e escalabilidade.
+
+---
+
+## Regras do negócio
+
+- Aluno com frequência abaixo de 75% é considerado Irregular
+- Não é permitido registrar presença duplicada para o mesmo aluno na mesma data e turma
+- O campo matrícula deve ser único no sistema
+- Atrasos contam como presença para o cálculo de frequência, mas são registrados separadamente
+
+---
+
+## Requisitos funcionais
+
+- Cadastro de alunos: nome, matrícula, turma, email, foto (opcional)
+- Edição e exclusão de alunos com confirmação
+- Registro de presença por data e turma: o professor seleciona a data, escolhe a turma e marca o status de cada aluno (Presente, Ausente, Atrasado)
+- Persistencia das presenças no PostgreSQL/Prisma, evitando duplicatas para a mesma data/turma/aluno
+- Listagem de presenças com filtro por data, turma e status
+- Busca de aluno por nome ou matrícula
+- Dashboard com resumo diario: total de presentes, ausentes e atrasados
+- Relatório individual por aluno: Histórico de presenças, percentual de frequência, situação (Regular/Irregular)
+
+
+## Stack Tecnológica
+
+- **Framework:** Next.js 14+ com App Router
+- **Linguagem:** TypeScript (strict mode)
+- **Banco de Dados:** PostgreSQL + Prisma ORM
+- **Autenticação:** NextAuth.js (sessão única de admin com credenciais)
+- **UI/Componentes:** shadcn/ui + Tailwind CSS
+- **Upload e Armazenamento de Imagens:** Cloudinary (múltiplas fotos por produto)
+- **Envio de E-mails:** Resend
+- **Deploy:** Vercel
+
+
+---
+
+## Estrutura de Pastas Sugerida (App Router)
+
+```
+    • app/alunos/page.tsx (listagem com busca por nome e matrícula)
+    • app/alunos/novo/page.tsx (formulário de criação)
+    • app/alunos/[id]/editar/page.tsx (formulário de edição)
+    • app/alunos/[id]/page.tsx (relatório individual do aluno)
+    • app/presenças/page.tsx (registro de presença por data e turma)
+    • app/presenças/historico/page.tsx (listagem com filtros)
+    • app/dashboard/page.tsx (resumo diário: totais de presente, ausente, atrasado)
+    • components/AlunoCard.tsx
+    • components/PresencaForm.tsx
+    • components/StatusBadge.tsx (verde/amarelo/vermelho)
+    • components/FiltroPresenca.tsx
+    • lib/api/alunos.ts
+    • lib/api/presencas.ts
+    • lib/utils/frequencia.ts (cálculo de percentual de frequência)
+
+---
+
+## Regras e Boas Práticas a Seguir
+
+- Usar **Server Actions** do Next.js 14 para mutações (criar, editar, excluir)
+- Usar **React Server Components** onde possível para listagens e páginas de detalhe
+- Validação de dados no servidor com **Zod** em todas as actions
+- Tratamento de erros consistente com feedback visual (toasts via shadcn/ui)
+- Toda exclusão de turma, aluno, classe, presença ou imagem deve exigir **confirmação em modal** antes de prosseguir
+- Imagens deletadas do produto devem ser removidas também do Cloudinary (usar `publicId`)
+- Senhas nunca armazenadas em texto puro; sempre `bcrypt`
+- Variáveis de ambiente tipadas e validadas com Zod no `env.ts`
+- Código comentado nos trechos de lógica mais complexa
+
+
