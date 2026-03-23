@@ -17,29 +17,29 @@ model User {
 }
 
 model Turma {
-  id         String     @id @default(cuid())
-  nome       String
-  turno      Turno
-  anoLetivo  String
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  alunos     Aluno[]
-  presencas  Presenca[]
+  id        String     @id @default(cuid())
+  nome      String
+  turno     Turno
+  anoLetivo String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  alunos    Aluno[]
+  presencas Presenca[]
 }
 
 model Aluno {
-  id                 String     @id @default(cuid())
-  nome               String
-  matricula          String     @unique
-  turmaId            String
-  emailResponsavel   String
-  fotoUrl            String?
-  fotoPublicId       String?
-  alertaEnviado      Boolean    @default(false)
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  turma              Turma      @relation(fields: [turmaId], references: [id])
-  presencas          Presenca[]
+  id               String     @id @default(cuid())
+  nome             String
+  matricula        String     @unique
+  turmaId          String
+  emailResponsavel String
+  fotoUrl          String?
+  fotoPublicId     String?
+  alertaEnviado    Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  turma            Turma      @relation(fields: [turmaId], references: [id])
+  presencas        Presenca[]
 }
 
 model Presenca {

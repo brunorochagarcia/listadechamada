@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, BarChart2 } from "lucide-react";
 import { TurmaDeleteButton } from "./TurmaDeleteButton";
 
 const turnoLabel = { MANHA: "Manhã", TARDE: "Tarde", NOITE: "Noite" };
@@ -24,7 +24,7 @@ export default async function TurmasPage() {
           <h1 className="text-2xl font-bold text-gray-900">Turmas</h1>
           <p className="text-sm text-gray-500 mt-1">{turmas.length} turma(s) cadastrada(s)</p>
         </div>
-        <Button render={<Link href="/turmas/nova" />}>
+        <Button nativeButton={false} render={<Link href="/turmas/nova" />}>
           <Plus size={16} />
           Nova Turma
         </Button>
@@ -55,7 +55,10 @@ export default async function TurmasPage() {
                   <TableCell className="text-center">{turma._count.alunos}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 justify-end">
-                      <Button variant="ghost" size="icon" render={<Link href={`/turmas/${turma.id}/editar`} />}>
+                      <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/turmas/${turma.id}`} />} title="Ver relatório">
+                        <BarChart2 size={15} />
+                      </Button>
+                      <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/turmas/${turma.id}/editar`} />}>
                         <Pencil size={15} />
                       </Button>
                       <TurmaDeleteButton id={turma.id} nome={turma.nome} />

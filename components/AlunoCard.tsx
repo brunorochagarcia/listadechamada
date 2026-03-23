@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil } from "lucide-react";
+import { Pencil, BarChart2 } from "lucide-react";
 import { AlunoDeleteButton } from "@/app/(dashboard)/alunos/AlunoDeleteButton";
 
 const turnoLabel = { MANHA: "Manhã", TARDE: "Tarde", NOITE: "Noite" };
@@ -48,7 +48,10 @@ export function AlunoCard({ aluno }: Props) {
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
-        <Button variant="ghost" size="icon" render={<Link href={`/alunos/${aluno.id}/editar`} />}>
+        <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/alunos/${aluno.id}`} />} title="Ver relatório">
+          <BarChart2 size={15} />
+        </Button>
+        <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/alunos/${aluno.id}/editar`} />}>
           <Pencil size={15} />
         </Button>
         <AlunoDeleteButton id={aluno.id} nome={aluno.nome} />

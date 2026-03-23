@@ -93,13 +93,13 @@ export default async function HistoricoPage({ searchParams }: Props) {
 
       {totalPaginas > 1 && (
         <div className="flex items-center gap-2 justify-end">
-          <Button variant="outline" size="sm" render={<Link href={pageUrl(currentPage - 1)} />} disabled={currentPage <= 1}>
+          <Button variant="outline" size="sm" nativeButton={false} render={<Link href={pageUrl(currentPage - 1)} />} disabled={currentPage <= 1}>
             Anterior
           </Button>
           <span className="text-sm text-gray-500">
             Página {currentPage} de {totalPaginas}
           </span>
-          <Button variant="outline" size="sm" render={<Link href={pageUrl(currentPage + 1)} />} disabled={currentPage >= totalPaginas}>
+          <Button variant="outline" size="sm" nativeButton={false} render={<Link href={pageUrl(currentPage + 1)} />} disabled={currentPage >= totalPaginas}>
             Próxima
           </Button>
         </div>

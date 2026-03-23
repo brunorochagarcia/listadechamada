@@ -1,3 +1,10 @@
+sudo docker run -it --name listachamada ubuntu /bin/bash
+
+docker exec -it 8235afd55273 createdb -U postgres listachamada
+
+
+
+
 Now use the PRD to create a TO DO list to make the whole project, from begginging to end. Show me this document
 
   TODO — Lista de Chamada (do zero ao deploy)                                                                                                                                                                                                 
@@ -10,7 +17,8 @@ Now use the PRD to create a TO DO list to make the whole project, from beggingin
   - Configurar variáveis de ambiente em .env (DATABASE_URL, NEXTAUTH_SECRET, Cloudinary, Resend)
   - Criar lib/env.ts — validação de variáveis com Zod, tipagem exportada
   - Ajustar tsconfig.json para strict mode (verificar se já está ativo)
-  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir 
+  - Mostrar o que foi feito ao usuário, explicar e aguardar aprovação antes de prosseguir
+
 
   1.2 Banco de Dados
 
