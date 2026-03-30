@@ -7,9 +7,9 @@ import { excluirAluno } from "./actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-type Props = { id: string; nome: string };
+type Props = { id: string; nome: string; presencasCount: number };
 
-export function AlunoDeleteButton({ id, nome }: Props) {
+export function AlunoDeleteButton({ id, nome, presencasCount }: Props) {
   const router = useRouter();
 
   async function handleDelete() {
@@ -30,7 +30,11 @@ export function AlunoDeleteButton({ id, nome }: Props) {
         </Button>
       }
       title="Excluir aluno"
-      description={`Tem certeza que deseja excluir "${nome}"? Todas as presenças serão removidas.`}
+      description={
+        presencasCount > 0
+          ? `Atenção: "${nome}" possui ${presencasCount} registro(s) de presença. Ao excluir, todo o histórico será perdido permanentemente.`
+          : `Tem certeza que deseja excluir "${nome}"?`
+      }
       confirmLabel="Excluir"
       onConfirm={handleDelete}
     />

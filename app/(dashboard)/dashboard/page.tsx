@@ -4,13 +4,10 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-async function getDashboardData() {
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-
+async function getDashboardData(data: Date) {
   // Presenças do dia agrupadas por turma
-  const presencasHoje = await prisma.presenca.findMany({
-    where: { data: hoje },
+  const presencasDia = await prisma.presenca.findMany({
+    where: { data },
     include: { turma: true },
   });
 
@@ -21,12 +18,23 @@ async function getDashboardData() {
     ATRASADO: number;
   }>();
 
-  for (const p of presencasHoje) {
+  for (const p of presencasDia) {
     if (!turmasMap.has(p.turmaId)) {
       turmasMap.set(p.turmaId, { nome: p.turma.nome, PRESENTE: 0, AUSENTE: 0, ATRASADO: 0 });
     }
     turmasMap.get(p.turmaId)![p.status]++;
   }
+
+  const turmas = Array.from(turmasMap.values());
+
+  const totais = turmas.reduce(
+    (acc, t) => ({
+      PRESENTE: acc.PRESENTE + t.PRESENTE,
+      AUSENTE: acc.AUSENTE + t.AUSENTE,
+      ATRASADO: acc.ATRASADO + t.ATRASADO,
+    }),
+    { PRESENTE: 0, AUSENTE: 0, ATRASADO: 0 }
+  );
 
   // Alunos irregulares
   const alunos = await prisma.aluno.findMany({
@@ -44,25 +52,79 @@ async function getDashboardData() {
     }))
     .filter((a) => calcularSituacao(a.percentual) === "Irregular");
 
-  return { turmas: Array.from(turmasMap.values()), irregulares };
+  return { turmas, totais, irregulares };
 }
 
-export default async function DashboardPage() {
-  const { turmas, irregulares } = await getDashboardData();
-  const hoje = new Date().toLocaleDateString("pt-BR");
+type Props = { searchParams: Promise<{ data?: string }> };
+
+export default async function DashboardPage({ searchParams }: Props) {
+  const { data: dataParam } = await searchParams;
+
+  const hoje = new Date().toISOString().split("T")[0];
+  const dataSelecionada = dataParam ?? hoje;
+
+  const dataObj = new Date(dataSelecionada);
+  dataObj.setUTCHours(0, 0, 0, 0);
+
+  const { turmas, totais, irregulares } = await getDashboardData(dataObj);
+
+  const dataFormatada = new Date(dataSelecionada).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+  const ehHoje = dataSelecionada === hoje;
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Visão geral do dia — {hoje}</p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Visão geral de {ehHoje ? "hoje" : dataFormatada}
+          </p>
+        </div>
+        <form method="GET" className="flex items-end gap-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+            <input
+              name="data"
+              type="date"
+              defaultValue={dataSelecionada}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg px-4 py-2 transition-colors"
+          >
+            Consultar
+          </button>
+        </form>
       </div>
+
+      {/* Cards de totais globais do dia */}
+      <section>
+        <h2 className="text-base font-semibold text-gray-700 mb-3">
+          Totais do dia
+        </h2>
+        <div className="grid gap-4 grid-cols-3">
+          {(
+            [
+              { status: "PRESENTE", label: "Presentes", value: totais.PRESENTE, color: "text-green-700", bg: "bg-green-50 border-green-200" },
+              { status: "AUSENTE", label: "Ausentes", value: totais.AUSENTE, color: "text-red-700", bg: "bg-red-50 border-red-200" },
+              { status: "ATRASADO", label: "Atrasados", value: totais.ATRASADO, color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-200" },
+            ] as const
+          ).map((item) => (
+            <div key={item.status} className={`rounded-xl border p-5 ${item.bg}`}>
+              <p className="text-sm font-medium text-gray-600">{item.label}</p>
+              <p className={`text-3xl font-bold mt-1 ${item.color}`}>{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Cards de chamada do dia por turma */}
       <section>
-        <h2 className="text-base font-semibold text-gray-700 mb-3">Chamada de hoje</h2>
+        <h2 className="text-base font-semibold text-gray-700 mb-3">Chamada por turma</h2>
         {turmas.length === 0 ? (
-          <p className="text-sm text-gray-400">Nenhuma chamada registrada hoje.</p>
+          <p className="text-sm text-gray-400">Nenhuma chamada registrada{ehHoje ? " hoje" : ` em ${dataFormatada}`}.</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {turmas.map((t) => {

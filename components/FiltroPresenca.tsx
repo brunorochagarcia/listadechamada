@@ -10,7 +10,7 @@ export function FiltroPresenca({ turmas }: { turmas: Turma[] }) {
   const params = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  function handleChange(e: React.FormEvent<HTMLFormElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLFormElement>) {
     const data = new FormData(e.currentTarget);
     const qs = new URLSearchParams();
     for (const [k, v] of data.entries()) {
@@ -20,7 +20,18 @@ export function FiltroPresenca({ turmas }: { turmas: Turma[] }) {
   }
 
   return (
-    <form onChange={(e) => handleChange(e as unknown as React.FormEvent<HTMLFormElement>)} className="flex flex-wrap gap-3 items-end">
+    <form onChange={handleChange} className="flex flex-wrap gap-3 items-end">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Aluno</label>
+        <input
+          name="busca"
+          type="text"
+          defaultValue={params.get("busca") ?? ""}
+          placeholder="Nome ou matrícula..."
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Turma</label>
         <select

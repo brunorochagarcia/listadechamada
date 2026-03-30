@@ -1,25 +1,28 @@
-import { v2 as cloudinary } from "cloudinary";
+import { writeFile, unlink } from "fs/promises";
+import path from "path";
+import { randomUUID } from "crypto";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+export const MAX_FOTO_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const UPLOAD_DIR = path.join(process.cwd(), "public/uploads/alunos");
 
 export async function uploadFoto(file: File): Promise<{ url: string; publicId: string }> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream({ folder: "listadechamada/alunos", resource_type: "image" }, (error, result) => {
-        if (error || !result) return reject(error);
-        resolve({ url: result.secure_url, publicId: result.public_id });
-      })
-      .end(buffer);
-  });
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const filename = `${randomUUID()}.${ext}`;
+  const filepath = path.join(UPLOAD_DIR, filename);
+
+  await writeFile(filepath, buffer);
+
+  return {
+    url: `/uploads/alunos/${filename}`,
+    publicId: filename,
+  };
 }
 
 export async function deleteFoto(publicId: string) {
-  await cloudinary.uploader.destroy(publicId);
+  const filepath = path.join(UPLOAD_DIR, publicId);
+  await unlink(filepath).catch(() => null);
 }

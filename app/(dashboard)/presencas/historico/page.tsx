@@ -20,12 +20,13 @@ type Props = {
     status?: string;
     dataInicio?: string;
     dataFim?: string;
+    busca?: string;
     page?: string;
   }>;
 };
 
 export default async function HistoricoPage({ searchParams }: Props) {
-  const { turmaId, status, dataInicio, dataFim, page } = await searchParams;
+  const { turmaId, status, dataInicio, dataFim, busca, page } = await searchParams;
   const currentPage = Number(page ?? 1);
 
   const [turmas, { registros, total, totalPaginas }] = await Promise.all([
@@ -35,6 +36,7 @@ export default async function HistoricoPage({ searchParams }: Props) {
       status: status as StatusPresenca | undefined,
       dataInicio: dataInicio ? new Date(dataInicio) : undefined,
       dataFim: dataFim ? new Date(dataFim) : undefined,
+      busca,
       page: currentPage,
       pageSize: 20,
     }),
@@ -46,6 +48,7 @@ export default async function HistoricoPage({ searchParams }: Props) {
       ...(status && { status }),
       ...(dataInicio && { dataInicio }),
       ...(dataFim && { dataFim }),
+      ...(busca && { busca }),
       page: String(p),
     });
     return `/presencas/historico?${qs.toString()}`;

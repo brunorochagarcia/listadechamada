@@ -14,6 +14,7 @@ type Props = {
     matricula: string;
     fotoUrl: string | null;
     turma: { nome: string; turno: "MANHA" | "TARDE" | "NOITE" };
+    _count: { presencas: number };
   };
 };
 
@@ -54,7 +55,7 @@ export function AlunoCard({ aluno }: Props) {
         <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/alunos/${aluno.id}/editar`} />}>
           <Pencil size={15} />
         </Button>
-        <AlunoDeleteButton id={aluno.id} nome={aluno.nome} />
+        <AlunoDeleteButton id={aluno.id} nome={aluno.nome} presencasCount={aluno._count.presencas} />
       </div>
     </div>
   );

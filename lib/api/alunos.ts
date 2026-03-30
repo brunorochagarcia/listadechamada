@@ -11,7 +11,7 @@ export async function getAlunos(search?: string) {
         }
       : undefined,
     orderBy: { nome: "asc" },
-    include: { turma: true },
+    include: { turma: true, _count: { select: { presencas: true } } },
   });
 }
 

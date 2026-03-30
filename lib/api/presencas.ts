@@ -13,12 +13,13 @@ type FiltrosHistorico = {
   status?: StatusPresenca;
   dataInicio?: Date;
   dataFim?: Date;
+  busca?: string;
   page?: number;
   pageSize?: number;
 };
 
 export async function getHistoricoPresencas(filtros: FiltrosHistorico = {}) {
-  const { turmaId, status, dataInicio, dataFim, page = 1, pageSize = 20 } = filtros;
+  const { turmaId, status, dataInicio, dataFim, busca, page = 1, pageSize = 20 } = filtros;
 
   const where = {
     ...(turmaId && { turmaId }),
@@ -31,6 +32,14 @@ export async function getHistoricoPresencas(filtros: FiltrosHistorico = {}) {
           },
         }
       : {}),
+    ...(busca && {
+      aluno: {
+        OR: [
+          { nome: { contains: busca, mode: "insensitive" as const } },
+          { matricula: { contains: busca, mode: "insensitive" as const } },
+        ],
+      },
+    }),
   };
 
   const [total, registros] = await prisma.$transaction([

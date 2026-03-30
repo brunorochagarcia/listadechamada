@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { uploadFoto, deleteFoto } from "@/lib/cloudinary";
+import { uploadFoto, deleteFoto, MAX_FOTO_SIZE } from "@/lib/cloudinary";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -29,12 +29,17 @@ export async function criarAluno(formData: FormData) {
   let fotoUrl: string | undefined;
   let fotoPublicId: string | undefined;
 
+  if (fotoFile && fotoFile.size > MAX_FOTO_SIZE) {
+    return { error: "Imagem muito grande, escolha uma menor" };
+  }
+
   if (fotoFile && fotoFile.size > 0) {
     try {
       const result = await uploadFoto(fotoFile);
       fotoUrl = result.url;
       fotoPublicId = result.publicId;
-    } catch {
+    } catch (e) {
+      console.error("[criarAluno] Erro no upload da foto:", e);
       return { error: "Erro ao fazer upload da foto" };
     }
   }
@@ -74,6 +79,10 @@ export async function editarAluno(id: string, formData: FormData) {
   let fotoUrl = aluno.fotoUrl ?? undefined;
   let fotoPublicId = aluno.fotoPublicId ?? undefined;
 
+  if (fotoFile && fotoFile.size > MAX_FOTO_SIZE) {
+    return { error: "Imagem muito grande, escolha uma menor" };
+  }
+
   if (fotoFile && fotoFile.size > 0) {
     try {
       // Remove foto anterior antes de fazer upload da nova
@@ -81,7 +90,8 @@ export async function editarAluno(id: string, formData: FormData) {
       const result = await uploadFoto(fotoFile);
       fotoUrl = result.url;
       fotoPublicId = result.publicId;
-    } catch {
+    } catch (e) {
+      console.error("[editarAluno] Erro no upload da foto:", e);
       return { error: "Erro ao fazer upload da foto" };
     }
   }
