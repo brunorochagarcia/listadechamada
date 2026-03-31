@@ -11,7 +11,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "Aluno não encontrado" }, { status: 404 });
   }
 
-  const percentual = calcularFrequencia(aluno.presencas);
+  const { percentual } = calcularFrequencia(aluno.presencas);
   const situacao = calcularSituacao(percentual);
 
   const buffer = await gerarRelatorioPDF({ aluno, presencas: aluno.presencas, percentual, situacao });

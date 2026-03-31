@@ -58,7 +58,7 @@ async function recalcularAlertas(alunoIds: string[]) {
 
   await Promise.all(
     alunos.map(async (aluno) => {
-      const percentual = calcularFrequencia(aluno.presencas);
+      const { percentual } = calcularFrequencia(aluno.presencas);
       const situacao = calcularSituacao(percentual);
 
       // Irregular e alerta ainda não enviado: envia e-mail e marca como enviado

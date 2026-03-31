@@ -65,16 +65,7 @@ export default async function TurmaRelatorioPage({ params }: Props) {
             </TableHeader>
             <TableBody>
               {turma.alunos.map((aluno) => {
-                const presentes = aluno.presencas.filter(
-                  (p) => p.status === "PRESENTE"
-                ).length;
-                const atrasados = aluno.presencas.filter(
-                  (p) => p.status === "ATRASADO"
-                ).length;
-                const ausentes = aluno.presencas.filter(
-                  (p) => p.status === "AUSENTE"
-                ).length;
-                const percentual = calcularFrequencia(aluno.presencas);
+                const { percentual, presentes, atrasados, ausentes } = calcularFrequencia(aluno.presencas);
                 const situacao = calcularSituacao(percentual);
                 const ultimo = aluno.presencas[0];
 

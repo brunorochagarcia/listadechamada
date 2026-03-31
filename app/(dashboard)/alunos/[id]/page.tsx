@@ -1,16 +1,8 @@
 import { getAlunoComPresencas } from "@/lib/api/alunos";
 import { calcularFrequencia, calcularSituacao } from "@/lib/utils/frequencia";
-import { StatusBadge } from "@/components/StatusBadge";
+import { CalendarioPresencas } from "@/components/CalendarioPresencas";
 import { ExportButtons } from "@/components/ExportButtons";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,7 +15,7 @@ export default async function RelatorioAlunoPage({ params }: Props) {
   const aluno = await getAlunoComPresencas(id);
   if (!aluno) notFound();
 
-  const percentual = calcularFrequencia(aluno.presencas);
+  const { percentual, total, presentes, atrasados, ausentes } = calcularFrequencia(aluno.presencas);
   const situacao = calcularSituacao(percentual);
 
   return (
@@ -68,32 +60,7 @@ export default async function RelatorioAlunoPage({ params }: Props) {
       {/* Histórico de presenças */}
       <div>
         <h2 className="text-base font-semibold text-gray-700 mb-3">Histórico de Presenças</h2>
-        {aluno.presencas.length === 0 ? (
-          <p className="text-sm text-gray-400">Nenhum registro de presença.</p>
-        ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {aluno.presencas.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell>
-                      {new Date(p.data).toLocaleDateString("pt-BR", { timeZone: "UTC" })}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={p.status} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+        <CalendarioPresencas presencas={aluno.presencas} />
       </div>
     </div>
   );

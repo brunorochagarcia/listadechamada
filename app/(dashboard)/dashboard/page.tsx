@@ -3,6 +3,7 @@ import { calcularFrequencia, calcularSituacao } from "@/lib/utils/frequencia";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { UserCheck, UserX, Clock } from "lucide-react";
 
 async function getDashboardData(data: Date) {
   // Presenças do dia agrupadas por turma
@@ -48,7 +49,7 @@ async function getDashboardData(data: Date) {
       nome: a.nome,
       matricula: a.matricula,
       turma: a.turma.nome,
-      percentual: calcularFrequencia(a.presencas),
+      percentual: calcularFrequencia(a.presencas).percentual,
     }))
     .filter((a) => calcularSituacao(a.percentual) === "Irregular");
 
@@ -107,14 +108,17 @@ export default async function DashboardPage({ searchParams }: Props) {
         <div className="grid gap-4 grid-cols-3">
           {(
             [
-              { status: "PRESENTE", label: "Presentes", value: totais.PRESENTE, color: "text-green-700", bg: "bg-green-50 border-green-200" },
-              { status: "AUSENTE", label: "Ausentes", value: totais.AUSENTE, color: "text-red-700", bg: "bg-red-50 border-red-200" },
-              { status: "ATRASADO", label: "Atrasados", value: totais.ATRASADO, color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-200" },
+              { status: "PRESENTE", label: "Presentes", value: totais.PRESENTE, color: "text-green-700", bg: "bg-green-50 border-green-200", icon: UserCheck },
+              { status: "AUSENTE", label: "Ausentes", value: totais.AUSENTE, color: "text-red-700", bg: "bg-red-50 border-red-200", icon: UserX },
+              { status: "ATRASADO", label: "Atrasados", value: totais.ATRASADO, color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-200", icon: Clock },
             ] as const
-          ).map((item) => (
-            <div key={item.status} className={`rounded-xl border p-5 ${item.bg}`}>
-              <p className="text-sm font-medium text-gray-600">{item.label}</p>
-              <p className={`text-3xl font-bold mt-1 ${item.color}`}>{item.value}</p>
+          ).map(({ status, label, value, color, bg, icon: Icon }) => (
+            <div key={status} className={`rounded-xl border p-5 ${bg}`}>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-sm font-medium text-gray-600">{label}</p>
+                <Icon size={18} className={color} />
+              </div>
+              <p className={`text-3xl font-bold ${color}`}>{value}</p>
             </div>
           ))}
         </div>
