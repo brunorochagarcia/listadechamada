@@ -4,7 +4,11 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 function isBancoIndisponivel(error: Error) {
-  return error.message.includes("Can't reach database") || error.message.includes("prisma");
+  return (
+    error.message.includes("Can't reach database") ||
+    error.message.includes("Connection refused") ||
+    ("code" in error && (error as { code: string }).code === "P1001")
+  );
 }
 
 function getTitulo(error: Error): string {
