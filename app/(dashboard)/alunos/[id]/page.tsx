@@ -2,11 +2,10 @@ import { getAlunoComPresencas } from "@/lib/api/alunos";
 import { calcularFrequencia, calcularSituacao } from "@/lib/utils/frequencia";
 import { CalendarioPresencas } from "@/components/CalendarioPresencas";
 import { ExportButtons } from "@/components/ExportButtons";
-import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BookOpen, Users, CreditCard, UserX } from "lucide-react";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -15,52 +14,96 @@ export default async function RelatorioAlunoPage({ params }: Props) {
   const aluno = await getAlunoComPresencas(id);
   if (!aluno) notFound();
 
-  const { percentual, total, presentes, atrasados, ausentes } = calcularFrequencia(aluno.presencas);
+  const { percentual, total, ausentes } = calcularFrequencia(aluno.presencas);
   const situacao = calcularSituacao(percentual);
+  const isRegular = situacao === "Regular";
 
   return (
-    <div className="space-y-6">
-      <Link href="/alunos" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900">
+    <div className="space-y-8">
+      <Link href="/alunos" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900">
         <ArrowLeft size={15} /> Voltar para Alunos
       </Link>
 
-      {/* Cabeçalho do aluno */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 flex items-center gap-5">
-        {aluno.fotoUrl ? (
-          <Image
-            src={aluno.fotoUrl}
-            alt={aluno.nome}
-            width={72}
-            height={72}
-            className="rounded-full object-cover size-18 shrink-0"
-          />
-        ) : (
-          <div className="size-18 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-semibold text-gray-400 shrink-0">
-            {aluno.nome[0].toUpperCase()}
+      {/* Perfil do aluno */}
+      <section className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-6">
+          <div className="relative shrink-0">
+            {aluno.fotoUrl ? (
+              <Image
+                src={aluno.fotoUrl}
+                alt={aluno.nome}
+                width={96}
+                height={96}
+                className="w-24 h-24 rounded-lg object-cover ring-4 ring-blue-50"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-lg bg-slate-100 flex items-center justify-center text-3xl font-bold text-slate-400 ring-4 ring-blue-50">
+                {aluno.nome[0].toUpperCase()}
+              </div>
+            )}
+            <div className={`absolute -bottom-1.5 -right-1.5 h-5 w-5 rounded-full border-4 border-white ${isRegular ? "bg-green-500" : "bg-red-500"}`} />
           </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-gray-900">{aluno.nome}</h1>
-          <p className="text-sm text-gray-500">Matrícula: {aluno.matricula}</p>
-          <p className="text-sm text-gray-500">Turma: {aluno.turma.nome} · {aluno.turma.anoLetivo}</p>
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-800">{aluno.nome}</h2>
+            <div className="flex gap-4 mt-1.5 text-slate-500 flex-wrap">
+              <span className="flex items-center gap-1.5 text-sm">
+                <BookOpen size={14} /> {aluno.turma.nome}
+              </span>
+              <span className="flex items-center gap-1.5 text-sm">
+                <Users size={14} /> {aluno.turma.anoLetivo}
+              </span>
+              <span className="flex items-center gap-1.5 text-sm">
+                <CreditCard size={14} /> Mat: {aluno.matricula}
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-3xl font-bold" style={{ color: situacao === "Regular" ? "#16a34a" : "#dc2626" }}>
-            {percentual}%
-          </p>
-          <Badge variant={situacao === "Regular" ? "default" : "destructive"} className="mt-1">
-            {situacao}
-          </Badge>
-          <p className="text-xs text-gray-400 mt-1">{aluno.presencas.length} registro(s)</p>
+        <ExportButtons alunoId={id} />
+      </section>
+
+      {/* Bento grid: stats + calendário */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Stats */}
+        <div className="lg:col-span-3 space-y-4">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Aulas</p>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-4xl font-black text-slate-800">{total}</h3>
+              <BookOpen size={28} className="text-blue-400" />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Faltas</p>
+            <div className="flex items-end justify-between mt-2">
+              <h3 className="text-4xl font-black text-red-600">{ausentes}</h3>
+              <UserX size={28} className="text-red-400" />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="relative z-10">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Frequência Geral</p>
+              <div className="mt-2">
+                <h3 className={`text-4xl font-black ${isRegular ? "text-blue-600" : "text-red-600"}`}>
+                  {percentual}%
+                </h3>
+                <div className="w-full bg-slate-100 h-2 rounded-full mt-4">
+                  <div
+                    className={`h-full rounded-full ${isRegular ? "bg-blue-500" : "bg-red-500"}`}
+                    style={{ width: `${percentual}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <ExportButtons alunoId={id} />
-
-      {/* Histórico de presenças */}
-      <div>
-        <h2 className="text-base font-semibold text-gray-700 mb-3">Histórico de Presenças</h2>
-        <CalendarioPresencas presencas={aluno.presencas} />
+        {/* Calendário */}
+        <div className="lg:col-span-9 bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <h3 className="text-lg font-bold text-slate-800 mb-4">Calendário de Presença</h3>
+          <CalendarioPresencas presencas={aluno.presencas} />
+        </div>
       </div>
     </div>
   );

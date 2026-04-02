@@ -26,7 +26,7 @@ export function NotificarButton({ id, temEmail }: { id: string; temEmail: boolea
     <button
       onClick={handleClick}
       disabled={isPending || !temEmail}
-      className="bg-blue-400 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 transition-colors active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+      className="px-4 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg hover:bg-slate-800 shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isPending ? "Enviando..." : "Notificar"}
     </button>
