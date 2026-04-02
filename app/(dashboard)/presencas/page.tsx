@@ -17,8 +17,12 @@ export default async function PresencasPage({ searchParams }: Props) {
 
   let alunos: { id: string; nome: string; matricula: string }[] = [];
   let presencasExistentes: Record<string, StatusPresenca> = {};
+  let turmaNome = "";
 
   if (turmaSelecionada) {
+    const turma = turmas.find((t) => t.id === turmaSelecionada);
+    turmaNome = turma?.nome ?? "";
+
     const [alunosResult, presencas] = await Promise.all([
       prisma.aluno.findMany({
         where: { turmaId: turmaSelecionada },
@@ -44,6 +48,7 @@ export default async function PresencasPage({ searchParams }: Props) {
         <PresencaForm
           key={`${turmaSelecionada}-${dataSelecionada}`}
           turmaId={turmaSelecionada}
+          turmaNome={turmaNome}
           data={dataSelecionada}
           alunos={alunos}
           presencasExistentes={presencasExistentes}

@@ -47,6 +47,11 @@ function templateAlerta(aluno: Aluno, percentual: number): string {
 }
 
 export async function enviarAlertaFrequencia(aluno: Aluno, percentual: number) {
+  if (!resend) {
+    console.warn("[alertaFrequencia] RESEND_API_KEY não configurada — e-mail não enviado.");
+    return;
+  }
+
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: aluno.emailResponsavel,
