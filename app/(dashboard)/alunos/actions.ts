@@ -11,6 +11,7 @@ const alunoSchema = z.object({
   matricula: z.string().min(1, "Matrícula obrigatória"),
   turmaId: z.string().min(1, "Turma obrigatória"),
   emailResponsavel: z.string().email("E-mail do responsável inválido"),
+  status: z.enum(["ATIVO", "PENDENTE"]).default("ATIVO"),
 });
 
 export async function criarAluno(formData: FormData) {
@@ -19,6 +20,7 @@ export async function criarAluno(formData: FormData) {
     matricula: formData.get("matricula"),
     turmaId: formData.get("turmaId"),
     emailResponsavel: formData.get("emailResponsavel"),
+    status: formData.get("status") ?? "ATIVO",
   });
 
   if (!parsed.success) {
@@ -66,6 +68,7 @@ export async function editarAluno(id: string, formData: FormData) {
     matricula: formData.get("matricula"),
     turmaId: formData.get("turmaId"),
     emailResponsavel: formData.get("emailResponsavel"),
+    status: formData.get("status") ?? "ATIVO",
   });
 
   if (!parsed.success) {
@@ -116,9 +119,7 @@ export async function excluirAluno(id: string) {
   const aluno = await prisma.aluno.findUnique({ where: { id } });
   if (!aluno) return { error: "Aluno não encontrado" };
 
-  if (aluno.fotoPublicId) await deleteFoto(aluno.fotoPublicId).catch(() => null);
-
-  await prisma.aluno.delete({ where: { id } });
+  await prisma.aluno.update({ where: { id }, data: { status: "INATIVO" } });
   revalidatePath("/alunos");
 }
 

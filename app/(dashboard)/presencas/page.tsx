@@ -38,8 +38,8 @@ export default async function PresencasPage({ searchParams }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Registro de Chamada</h1>
-        <p className="text-sm text-gray-500 mt-1">Selecione a turma e a data para registrar a chamada.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-800">Registro de Chamada</h1>
+        <p className="text-sm text-slate-500 mt-1">Selecione a turma e a data para registrar a chamada.</p>
       </div>
 
       <FiltrosChamada turmas={turmas} />

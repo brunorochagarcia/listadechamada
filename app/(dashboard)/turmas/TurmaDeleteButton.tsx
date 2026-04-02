@@ -25,8 +25,9 @@ export function TurmaDeleteButton({ id, nome }: Props) {
   return (
     <ConfirmModal
       trigger={
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700">
-          <Trash2 size={15} />
+        <Button variant="ghost" size="sm" className="flex items-center gap-1.5 text-xs font-semibold text-red-400 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 h-auto rounded-lg">
+          <Trash2 size={13} />
+          Excluir
         </Button>
       }
       title="Excluir turma"

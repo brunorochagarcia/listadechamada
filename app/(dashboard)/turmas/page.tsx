@@ -1,18 +1,13 @@
 import Link from "next/link";
 import { getTurmas } from "@/lib/api/turmas";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Plus, Pencil, BarChart2 } from "lucide-react";
+import { Plus, Pencil, Users, GraduationCap, BarChart2 } from "lucide-react";
 import { TurmaDeleteButton } from "./TurmaDeleteButton";
 
-const turnoLabel = { MANHA: "Manhã", TARDE: "Tarde", NOITE: "Noite" };
+const turnoConfig = {
+  MANHA:  { label: "Manhã",  badge: "bg-amber-100 text-amber-700" },
+  TARDE:  { label: "Tarde",  badge: "bg-blue-100 text-blue-700" },
+  NOITE:  { label: "Noite",  badge: "bg-slate-100 text-slate-600" },
+};
 
 export default async function TurmasPage() {
   const turmas = await getTurmas();
@@ -21,53 +16,75 @@ export default async function TurmasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Turmas</h1>
-          <p className="text-sm text-gray-500 mt-1">{turmas.length} turma(s) cadastrada(s)</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-800">Turmas</h1>
+          <p className="text-sm text-slate-500 mt-1">{turmas.length} turma{turmas.length !== 1 ? "s" : ""} cadastrada{turmas.length !== 1 ? "s" : ""}</p>
         </div>
-        <Button nativeButton={false} render={<Link href="/turmas/nova" />}>
+        <Link
+          href="/turmas/nova"
+          className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
+        >
           <Plus size={16} />
           Nova Turma
-        </Button>
+        </Link>
       </div>
 
       {turmas.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-slate-400">
           Nenhuma turma cadastrada. Crie a primeira.
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Turno</TableHead>
-                <TableHead>Ano Letivo</TableHead>
-                <TableHead className="text-center">Alunos</TableHead>
-                <TableHead className="w-24" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {turmas.map((turma) => (
-                <TableRow key={turma.id}>
-                  <TableCell className="font-medium">{turma.nome}</TableCell>
-                  <TableCell>{turnoLabel[turma.turno]}</TableCell>
-                  <TableCell>{turma.anoLetivo}</TableCell>
-                  <TableCell className="text-center">{turma._count.alunos}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 justify-end">
-                      <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/turmas/${turma.id}`} />} title="Ver relatório">
-                        <BarChart2 size={15} />
-                      </Button>
-                      <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/turmas/${turma.id}/editar`} />}>
-                        <Pencil size={15} />
-                      </Button>
-                      <TurmaDeleteButton id={turma.id} nome={turma.nome} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="space-y-3">
+          {turmas.map((turma) => {
+            const turno = turnoConfig[turma.turno];
+            return (
+              <div
+                key={turma.id}
+                className="bg-white rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 px-5 py-4"
+              >
+                {/* Ícone */}
+                <div className="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                  <GraduationCap size={22} className="text-blue-600" />
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-base font-extrabold text-slate-800">{turma.nome}</span>
+                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${turno.badge}`}>
+                      {turno.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-slate-400 text-sm">
+                    <span>{turma.anoLetivo}</span>
+                    <span className="flex items-center gap-1">
+                      <Users size={13} />
+                      {turma._count.alunos} aluno{turma._count.alunos !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Ações */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <Link
+                    href={`/turmas/${turma.id}`}
+                    title="Ver relatório"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  >
+                    <BarChart2 size={14} />
+                    Relatório
+                  </Link>
+                  <Link
+                    href={`/turmas/${turma.id}/editar`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  >
+                    <Pencil size={14} />
+                    Editar
+                  </Link>
+                  <TurmaDeleteButton id={turma.id} nome={turma.nome} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

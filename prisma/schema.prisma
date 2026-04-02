@@ -28,17 +28,18 @@ model Turma {
 }
 
 model Aluno {
-  id               String     @id @default(cuid())
+  id               String       @id @default(cuid())
   nome             String
-  matricula        String     @unique
+  matricula        String       @unique
   turmaId          String
   emailResponsavel String
   fotoUrl          String?
   fotoPublicId     String?
-  alertaEnviado    Boolean    @default(false)
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  turma            Turma      @relation(fields: [turmaId], references: [id])
+  status           StatusAluno  @default(ATIVO)
+  alertaEnviado    Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  turma            Turma        @relation(fields: [turmaId], references: [id])
   presencas        Presenca[]
 }
 
@@ -70,4 +71,10 @@ enum StatusPresenca {
   PRESENTE
   AUSENTE
   ATRASADO
+}
+
+enum StatusAluno {
+  ATIVO
+  PENDENTE
+  INATIVO
 }

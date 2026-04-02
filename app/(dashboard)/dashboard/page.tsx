@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { calcularFrequencia, calcularSituacao } from "@/lib/utils/frequencia";
 import { NotificarButton } from "@/components/NotificarButton";
+import { NotificarTodosButton } from "@/components/NotificarTodosButton";
 import Link from "next/link";
-import { Users, CheckCircle, AlertTriangle } from "lucide-react";
+import { Users, CheckCircle, AlertTriangle, FileText } from "lucide-react";
 
 async function getDashboardData(data: Date) {
   const presencasDia = await prisma.presenca.findMany({
@@ -103,6 +104,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               Consultar
             </button>
           </form>
+
           <Link
             href="/presencas"
             className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
@@ -113,39 +115,43 @@ export default async function DashboardPage({ searchParams }: Props) {
       </div>
 
       {/* Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-              <Users size={22} className="text-blue-600" />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
+            <Users size={18} className="text-blue-600" />
           </div>
-          <p className="text-sm font-medium text-slate-500">Total de Alunos</p>
-          <h3 className="text-3xl font-black text-slate-800">{totalAlunos}</h3>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-              <CheckCircle size={22} className="text-green-600" />
-            </div>
-            <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-full">Meta: 95%</span>
+          <div>
+            <p className="text-xs font-medium text-slate-500">Total de Alunos</p>
+            <h3 className="text-2xl font-black text-slate-800 leading-none mt-0.5">{totalAlunos}</h3>
           </div>
-          <p className="text-sm font-medium text-slate-500">Presença {ehHoje ? "Hoje" : dataFormatada}</p>
-          <h3 className="text-3xl font-black text-slate-800">
-            {totalDia > 0 ? `${percentualPresencaDia}%` : "—"}
-          </h3>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
-              <AlertTriangle size={22} className="text-red-600" />
+        <div className="bg-sky-500 p-4 rounded-xl shadow-sm flex items-center gap-4">
+          <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
+            <CheckCircle size={18} className="text-white" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-white/80">Presença {ehHoje ? "Hoje" : dataFormatada}</p>
+              <span className="text-[10px] font-bold text-white/60 bg-white/10 px-1.5 py-0.5 rounded-full">Meta: 95%</span>
+            </div>
+            <h3 className="text-2xl font-black text-white leading-none mt-0.5">
+              {totalDia > 0 ? `${percentualPresencaDia}%` : "—"}
+            </h3>
+          </div>
+        </div>
+        <div className="bg-red-50 p-4 rounded-xl border border-red-100 shadow-sm flex items-center gap-4">
+          <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shrink-0">
+            <AlertTriangle size={18} className="text-red-500" />
+          </div>
+          <div className="flex-1 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-red-700">Alunos Irregulares</p>
+              <h3 className="text-2xl font-black text-red-800 leading-none mt-0.5">{irregulares.length}</h3>
             </div>
             {irregulares.length > 0 && (
-              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full">Atenção</span>
+              <span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">Atenção</span>
             )}
           </div>
-          <p className="text-sm font-medium text-slate-500">Alunos Irregulares</p>
-          <h3 className="text-3xl font-black text-slate-800">{irregulares.length}</h3>
         </div>
       </div>
 
@@ -262,21 +268,28 @@ export default async function DashboardPage({ searchParams }: Props) {
             </div>
           )}
 
-          {/* Envio em Massa */}
+          {/* Alunos Irregulares */}
           {irregulares.length > 0 && (
-            <div className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+            <div className="bg-blue-600 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden">
               <div className="relative z-10">
-                <AlertTriangle size={28} className="mb-4" />
-                <h4 className="font-bold text-lg mb-2">Envio em Massa</h4>
-                <p className="text-white/80 text-sm mb-6">
-                  {irregulares.length} aluno{irregulares.length > 1 ? "s" : ""} com frequência abaixo do mínimo exigido.
+                <div className="flex items-center gap-2 mb-1">
+                  <AlertTriangle size={16} />
+                  <h4 className="font-bold text-sm">Alunos Irregulares</h4>
+                </div>
+                <p className="text-white/75 text-xs mb-4">
+                  {irregulares.length} aluno{irregulares.length > 1 ? "s" : ""} com frequência abaixo do mínimo.
                 </p>
-                <Link
-                  href="/alunos"
-                  className="block w-full py-2 bg-white text-blue-600 rounded-lg font-bold text-sm hover:bg-slate-50 transition-colors text-center"
-                >
-                  Ver Relatórios
-                </Link>
+                <div className="flex gap-2">
+                  <NotificarTodosButton />
+                  <a
+                    href="/api/relatorio/irregulares/pdf"
+                    target="_blank"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white/15 text-white rounded-lg font-bold text-xs hover:bg-white/25 transition-colors"
+                  >
+                    <FileText size={13} />
+                    Relatórios
+                  </a>
+                </div>
               </div>
               <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
             </div>

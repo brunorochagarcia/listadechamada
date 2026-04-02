@@ -2,7 +2,6 @@
 
 import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,6 +22,7 @@ const schema = z.object({
   matricula: z.string().min(1, "Matrícula obrigatória"),
   turmaId: z.string().min(1, "Turma obrigatória"),
   emailResponsavel: z.string().min(1, "E-mail obrigatório").email("E-mail inválido"),
+  status: z.enum(["ATIVO", "PENDENTE"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -37,11 +37,13 @@ type Props = {
     turmaId: string;
     emailResponsavel: string;
     fotoUrl?: string | null;
+    status?: "ATIVO" | "PENDENTE";
   };
   action: (formData: FormData) => Promise<{ error: string } | void>;
+  onCancel?: () => void;
 };
 
-export function AlunoForm({ turmas, defaultValues, action }: Props) {
+export function AlunoForm({ turmas, defaultValues, action, onCancel }: Props) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -61,6 +63,7 @@ export function AlunoForm({ turmas, defaultValues, action }: Props) {
       matricula: defaultValues?.matricula ?? "",
       turmaId: defaultValues?.turmaId ?? "",
       emailResponsavel: defaultValues?.emailResponsavel ?? "",
+      status: defaultValues?.status ?? "ATIVO",
     },
   });
 
@@ -83,6 +86,8 @@ export function AlunoForm({ turmas, defaultValues, action }: Props) {
     formData.set("turmaId", values.turmaId);
     formData.set("emailResponsavel", values.emailResponsavel);
 
+    formData.set("status", values.status);
+
     const fotoFile = fileRef.current?.files?.[0];
     if (fotoFile) formData.set("foto", fotoFile);
 
@@ -99,50 +104,47 @@ export function AlunoForm({ turmas, defaultValues, action }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md">
       {/* Foto */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Foto</label>
-        <div className="flex items-center gap-4">
-          <div
-            className="size-16 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
-            onClick={() => fileRef.current?.click()}
-          >
-            {preview ? (
-              <Image src={preview} alt="Preview" width={64} height={64} className="object-cover size-full" />
-            ) : (
-              <Camera size={20} className="text-gray-400" />
-            )}
-          </div>
-          <div>
-            <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-              {preview ? "Trocar foto" : "Selecionar foto"}
-            </Button>
-            <p className="text-xs text-gray-400 mt-1">JPG, PNG ou WEBP</p>
-          </div>
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Foto do Aluno</label>
+        <div
+          className="relative w-36 cursor-pointer overflow-hidden rounded-lg bg-slate-100 hover:brightness-90 transition"
+          style={{ aspectRatio: "3/4" }}
+          onClick={() => fileRef.current?.click()}
+        >
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={preview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+              <Camera size={24} className="text-slate-400" />
+              <p className="text-xs text-slate-400 font-medium text-center px-2">Clique para adicionar foto</p>
+            </div>
+          )}
         </div>
         <input ref={fileRef} name="foto" type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
           Nome completo <span className="text-red-500">*</span>
         </label>
-        <Input {...register("nome")} placeholder="Ex: João da Silva" />
+        <Input {...register("nome")} placeholder="Ex: João da Silva" className="bg-white/80 backdrop-blur-sm" />
         {errors.nome && <p className="text-xs text-red-500 mt-1">{errors.nome.message}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
           Matrícula <span className="text-red-500">*</span>
         </label>
-        <Input {...register("matricula")} placeholder="Ex: 2026001" />
+        <Input {...register("matricula")} placeholder="Ex: 2026001" className="bg-white/80 backdrop-blur-sm" />
         {errors.matricula && <p className="text-xs text-red-500 mt-1">{errors.matricula.message}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
           Turma <span className="text-red-500">*</span>
         </label>
         <Select value={turmaId} onValueChange={(v) => { if (v) setValue("turmaId", v, { shouldValidate: true }); }}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full bg-white/80 backdrop-blur-sm">
             <SelectValue placeholder="Selecione a turma">
               {turmaLabel ? `${turmaLabel.nome} — ${turmaLabel.anoLetivo}` : null}
             </SelectValue>
@@ -159,11 +161,27 @@ export function AlunoForm({ turmas, defaultValues, action }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
           E-mail do responsável <span className="text-red-500">*</span>
         </label>
-        <Input {...register("emailResponsavel")} type="email" placeholder="responsavel@email.com" />
+        <Input {...register("emailResponsavel")} type="email" placeholder="responsavel@email.com" className="bg-white/80 backdrop-blur-sm" />
         {errors.emailResponsavel && <p className="text-xs text-red-500 mt-1">{errors.emailResponsavel.message}</p>}
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+          Status
+        </label>
+        <div className="flex gap-3">
+          {(["ATIVO", "PENDENTE"] as const).map((s) => (
+            <label key={s} className="flex-1 cursor-pointer">
+              <input type="radio" value={s} {...register("status")} className="sr-only peer" />
+              <div className={`text-center py-2 rounded-lg border-2 text-xs font-bold transition-colors peer-checked:border-sky-500 peer-checked:bg-sky-50 peer-checked:text-sky-700 border-slate-200 text-slate-400`}>
+                {s === "ATIVO" ? "Ativo" : "Pendente"}
+              </div>
+            </label>
+          ))}
+        </div>
       </div>
 
       {serverError && (
@@ -176,7 +194,7 @@ export function AlunoForm({ turmas, defaultValues, action }: Props) {
         <Button type="submit" disabled={isPending}>
           {isPending ? "Salvando..." : "Salvar"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>
+        <Button type="button" variant="outline" onClick={() => onCancel ? onCancel() : router.back()}>
           Cancelar
         </Button>
       </div>

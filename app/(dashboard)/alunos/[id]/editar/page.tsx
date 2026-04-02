@@ -16,8 +16,8 @@ export default async function EditarAlunoPage({ params }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Editar Aluno</h1>
-        <p className="text-sm text-gray-500 mt-1">Atualize os dados do aluno.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-800">Editar Aluno</h1>
+        <p className="text-sm text-slate-500 mt-1">Atualize os dados do aluno.</p>
       </div>
       <AlunoForm
         turmas={turmas}
@@ -27,6 +27,7 @@ export default async function EditarAlunoPage({ params }: Props) {
           turmaId: aluno.turmaId,
           emailResponsavel: aluno.emailResponsavel,
           fotoUrl: aluno.fotoUrl,
+          status: aluno.status,
         }}
         action={action}
       />

@@ -17,7 +17,7 @@ export function AlunoDeleteButton({ id, nome, presencasCount }: Props) {
     if (result?.error) {
       toast.error(result.error);
     } else {
-      toast.success(`Aluno "${nome}" excluído`);
+      toast.success(`Aluno "${nome}" desativado`);
       router.refresh();
     }
   }
@@ -29,13 +29,9 @@ export function AlunoDeleteButton({ id, nome, presencasCount }: Props) {
           <Trash2 size={15} />
         </Button>
       }
-      title="Excluir aluno"
-      description={
-        presencasCount > 0
-          ? `Atenção: "${nome}" possui ${presencasCount} registro(s) de presença. Ao excluir, todo o histórico será perdido permanentemente.`
-          : `Tem certeza que deseja excluir "${nome}"?`
-      }
-      confirmLabel="Excluir"
+      title="Desativar aluno"
+      description={`Tem certeza que deseja desativar "${nome}"? O aluno irá para o fim da lista com status inativo. O histórico de presenças será mantido.`}
+      confirmLabel="Desativar"
       onConfirm={handleDelete}
     />
   );

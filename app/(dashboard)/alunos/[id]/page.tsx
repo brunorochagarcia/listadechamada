@@ -3,9 +3,8 @@ import { calcularFrequencia, calcularSituacao } from "@/lib/utils/frequencia";
 import { CalendarioPresencas } from "@/components/CalendarioPresencas";
 import { ExportButtons } from "@/components/ExportButtons";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Users, CreditCard, UserX } from "lucide-react";
+import { ArrowLeft, BookOpen, Users, CreditCard, UserX, BarChart2 } from "lucide-react";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -25,23 +24,22 @@ export default async function RelatorioAlunoPage({ params }: Props) {
       </Link>
 
       {/* Perfil do aluno */}
-      <section className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
+      <section className="bg-white rounded-xl shadow-sm p-6 border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-6">
           <div className="relative shrink-0">
             {aluno.fotoUrl ? (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={aluno.fotoUrl}
                 alt={aluno.nome}
-                width={96}
-                height={96}
-                className="w-24 h-24 rounded-lg object-cover ring-4 ring-blue-50"
+                className="w-20 h-20 rounded-xl object-cover ring-4 ring-white shadow-sm"
               />
             ) : (
-              <div className="w-24 h-24 rounded-lg bg-slate-100 flex items-center justify-center text-3xl font-bold text-slate-400 ring-4 ring-blue-50">
+              <div className="w-20 h-20 rounded-xl bg-white flex items-center justify-center text-3xl font-bold text-slate-400 ring-4 ring-white shadow-sm">
                 {aluno.nome[0].toUpperCase()}
               </div>
             )}
-            <div className={`absolute -bottom-1.5 -right-1.5 h-5 w-5 rounded-full border-4 border-white ${isRegular ? "bg-green-500" : "bg-red-500"}`} />
+            <div className={`absolute -bottom-1.5 -right-1.5 h-4 w-4 rounded-full border-2 border-white ${isRegular ? "bg-green-500" : "bg-red-500"}`} />
           </div>
           <div>
             <h2 className="text-2xl font-extrabold text-slate-800">{aluno.nome}</h2>
@@ -65,37 +63,37 @@ export default async function RelatorioAlunoPage({ params }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Stats */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Aulas</p>
-            <div className="flex items-end justify-between mt-2">
-              <h3 className="text-4xl font-black text-slate-800">{total}</h3>
-              <BookOpen size={28} className="text-blue-400" />
+          {/* Total de Aulas */}
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Aulas</p>
+              <h3 className="text-4xl font-black text-slate-800 mt-1">{total}</h3>
             </div>
+            <BookOpen size={28} className="text-blue-300 shrink-0" />
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-red-500">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Faltas</p>
-            <div className="flex items-end justify-between mt-2">
-              <h3 className="text-4xl font-black text-red-600">{ausentes}</h3>
-              <UserX size={28} className="text-red-400" />
+          {/* Total de Faltas */}
+          <div className="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-500 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Faltas</p>
+              <h3 className="text-4xl font-black text-red-600 mt-1">{ausentes}</h3>
             </div>
+            <UserX size={28} className="text-red-300 shrink-0" />
           </div>
 
+          {/* Frequência Geral */}
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
             <div className="relative z-10">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Frequência Geral</p>
-              <div className="mt-2">
-                <h3 className={`text-4xl font-black ${isRegular ? "text-blue-600" : "text-red-600"}`}>
-                  {percentual}%
-                </h3>
-                <div className="w-full bg-slate-100 h-2 rounded-full mt-4">
-                  <div
-                    className={`h-full rounded-full ${isRegular ? "bg-blue-500" : "bg-red-500"}`}
-                    style={{ width: `${percentual}%` }}
-                  />
-                </div>
+              <h3 className={`text-4xl font-black mt-1 ${isRegular ? "text-blue-600" : "text-red-600"}`}>{percentual}%</h3>
+              <div className="w-full bg-slate-100 h-2 rounded-full mt-3">
+                <div
+                  className={`h-full rounded-full ${isRegular ? "bg-blue-500" : "bg-red-500"}`}
+                  style={{ width: `${percentual}%` }}
+                />
               </div>
             </div>
+            <BarChart2 size={64} className="absolute -right-3 -bottom-3 text-slate-100" />
           </div>
         </div>
 

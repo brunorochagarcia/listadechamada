@@ -8,8 +8,8 @@ export default async function NovoAlunoPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Novo Aluno</h1>
-        <p className="text-sm text-gray-500 mt-1">Preencha os dados para cadastrar um novo aluno.</p>
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-800">Novo Aluno</h1>
+        <p className="text-sm text-slate-500 mt-1">Preencha os dados para cadastrar um novo aluno.</p>
       </div>
       <AlunoForm turmas={turmas} action={criarAluno} />
     </div>

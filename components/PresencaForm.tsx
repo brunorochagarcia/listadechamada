@@ -71,34 +71,26 @@ export function PresencaForm({ turmaId, turmaNome, data, alunos, presencasExiste
 
   return (
     <div className="space-y-5 pb-24">
-      {/* Resumo da turma + stats */}
-      <div className="bg-white/80 backdrop-blur-md p-5 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Turma Selecionada</p>
-          <h2 className="text-xl font-bold text-slate-800">{turmaNome}</h2>
-          <p className="text-sm text-slate-500 mt-0.5">{dataFormatada}</p>
-        </div>
+      {/* Resumo da turma */}
+      <div className="bg-white/80 backdrop-blur-md p-5 rounded-xl shadow-sm border border-slate-200">
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Turma Selecionada</p>
+        <h2 className="text-xl font-bold text-slate-800">{turmaNome}</h2>
+        <p className="text-sm text-slate-500 mt-0.5">{dataFormatada}</p>
+      </div>
 
-        <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
-          <div className="text-center">
-            <p className="text-[10px] text-blue-600 font-bold uppercase">Total</p>
-            <p className="text-xl font-bold text-slate-800">{alunos.length}</p>
-          </div>
-          <div className="w-px h-8 bg-blue-200 mx-1" />
-          <div className="text-center">
-            <p className="text-[10px] text-green-600 font-bold uppercase">Presentes</p>
-            <p className="text-xl font-bold text-slate-800">{presentes}</p>
-          </div>
-          <div className="w-px h-8 bg-blue-200 mx-1" />
-          <div className="text-center">
-            <p className="text-[10px] text-red-600 font-bold uppercase">Ausentes</p>
-            <p className="text-xl font-bold text-slate-800">{ausentes}</p>
-          </div>
-          <div className="w-px h-8 bg-blue-200 mx-1" />
-          <div className="text-center">
-            <p className="text-[10px] text-amber-600 font-bold uppercase">Atrasados</p>
-            <p className="text-xl font-bold text-slate-800">{atrasados}</p>
-          </div>
+      {/* Stats coloridos */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+          <p className="text-[10px] uppercase font-bold text-green-700">Presentes</p>
+          <p className="text-2xl font-bold text-green-800">{presentes}</p>
+        </div>
+        <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+          <p className="text-[10px] uppercase font-bold text-red-700">Ausentes</p>
+          <p className="text-2xl font-bold text-red-800">{ausentes}</p>
+        </div>
+        <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
+          <p className="text-[10px] uppercase font-bold text-amber-700">Atrasados</p>
+          <p className="text-2xl font-bold text-amber-800">{atrasados}</p>
         </div>
       </div>
 
