@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { getTurmas } from "@/lib/api/turmas";
-import { Plus, Pencil, Users, GraduationCap, BarChart2 } from "lucide-react";
+import { Pencil, Users, GraduationCap, BarChart2 } from "lucide-react";
 import { TurmaDeleteButton } from "./TurmaDeleteButton";
+import { NovaTurmaModal } from "@/components/NovaTurmaModal";
 
 const turnoConfig = {
   MANHA:  { label: "Manhã",  badge: "bg-amber-100 text-amber-700" },
@@ -19,13 +20,7 @@ export default async function TurmasPage() {
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-800">Turmas</h1>
           <p className="text-sm text-slate-500 mt-1">{turmas.length} turma{turmas.length !== 1 ? "s" : ""} cadastrada{turmas.length !== 1 ? "s" : ""}</p>
         </div>
-        <Link
-          href="/turmas/nova"
-          className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
-        >
-          <Plus size={16} />
-          Nova Turma
-        </Link>
+        <NovaTurmaModal />
       </div>
 
       {turmas.length === 0 ? (

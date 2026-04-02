@@ -17,9 +17,10 @@ import type { Turno } from "@prisma/client";
 type Props = {
   defaultValues?: { nome: string; turno: Turno; anoLetivo: string };
   action: (formData: FormData) => Promise<{ error: string } | void>;
+  onCancel?: () => void;
 };
 
-export function TurmaForm({ defaultValues, action }: Props) {
+export function TurmaForm({ defaultValues, action, onCancel }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -43,18 +44,22 @@ export function TurmaForm({ defaultValues, action }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nome da turma</label>
-        <Input name="nome" defaultValue={defaultValues?.nome} placeholder="Ex: 3A" required />
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+          Nome da turma <span className="text-red-500">*</span>
+        </label>
+        <Input name="nome" defaultValue={defaultValues?.nome} placeholder="Ex: 3A" required className="bg-white/80 backdrop-blur-sm" />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Turno</label>
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+          Turno <span className="text-red-500">*</span>
+        </label>
         <Select
           value={turno}
           onValueChange={(value) => { if (value) setTurno(value); }}
           required
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full bg-white/80 backdrop-blur-sm">
             <SelectValue placeholder="Selecione o turno" />
           </SelectTrigger>
           <SelectContent>
@@ -66,12 +71,15 @@ export function TurmaForm({ defaultValues, action }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Ano letivo</label>
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+          Ano letivo <span className="text-red-500">*</span>
+        </label>
         <Input
           name="anoLetivo"
           defaultValue={defaultValues?.anoLetivo}
           placeholder="Ex: 2026"
           required
+          className="bg-white/80 backdrop-blur-sm"
         />
       </div>
 
@@ -85,7 +93,7 @@ export function TurmaForm({ defaultValues, action }: Props) {
         <Button type="submit" disabled={isPending}>
           {isPending ? "Salvando..." : "Salvar"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>
+        <Button type="button" variant="outline" onClick={() => onCancel ? onCancel() : router.back()}>
           Cancelar
         </Button>
       </div>
