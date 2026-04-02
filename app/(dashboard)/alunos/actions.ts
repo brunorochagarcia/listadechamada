@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { StatusAluno } from "@prisma/client";
 import { uploadFoto, deleteFoto, MAX_FOTO_SIZE } from "@/lib/cloudinary";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -119,7 +120,13 @@ export async function excluirAluno(id: string) {
   const aluno = await prisma.aluno.findUnique({ where: { id } });
   if (!aluno) return { error: "Aluno não encontrado" };
 
-  await prisma.aluno.update({ where: { id }, data: { status: "INATIVO" } });
+  try {
+    await prisma.aluno.update({ where: { id }, data: { status: StatusAluno.INATIVO } });
+  } catch (e) {
+    console.error("[excluirAluno]", e);
+    return { error: "Erro ao desativar aluno" };
+  }
+
   revalidatePath("/alunos");
 }
 

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { getTurmas } from "@/lib/api/turmas";
-import { Pencil, Users, GraduationCap, BarChart2 } from "lucide-react";
+import { Users, GraduationCap } from "lucide-react";
 import { TurmaDeleteButton } from "./TurmaDeleteButton";
 import { NovaTurmaModal } from "@/components/NovaTurmaModal";
+import { EditarTurmaModal } from "@/components/EditarTurmaModal";
+import { RelatorioTurmaModal } from "@/components/RelatorioTurmaModal";
 
 const turnoConfig = {
   MANHA:  { label: "Manhã",  badge: "bg-amber-100 text-amber-700" },
@@ -60,21 +62,8 @@ export default async function TurmasPage() {
 
                 {/* Ações */}
                 <div className="flex items-center gap-1 shrink-0">
-                  <Link
-                    href={`/turmas/${turma.id}`}
-                    title="Ver relatório"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                  >
-                    <BarChart2 size={14} />
-                    Relatório
-                  </Link>
-                  <Link
-                    href={`/turmas/${turma.id}/editar`}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-                  >
-                    <Pencil size={14} />
-                    Editar
-                  </Link>
+                  <RelatorioTurmaModal turmaId={turma.id} turmaNome={turma.nome} />
+                  <EditarTurmaModal turma={turma} />
                   <TurmaDeleteButton id={turma.id} nome={turma.nome} />
                 </div>
               </div>

@@ -69,16 +69,19 @@ async function main() {
   let matricula = 1;
   const todosAlunos: { id: string; turmaId: string; role: "PRESENTE_100" | "AUSENTE_100" | "ATRASADO_100" | "RANDOM" }[] = [];
 
+  // índice 5 e 6 de cada turma → INATIVO (para testar soft-delete)
   for (let t = 0; t < turmas.length; t++) {
     const turma = turmas[t];
-    // índice 0 → 100% PRESENTE, índice 1 → 100% AUSENTE, índice 2 → 100% ATRASADO, resto → aleatório
+    // índice 0 → 100% PRESENTE, 1 → 100% AUSENTE, 2 → 100% ATRASADO, 5-6 → INATIVO, resto → aleatório
     for (let a = 0; a < 7; a++) {
+      const status = a >= 5 ? "INATIVO" as const : "ATIVO" as const;
       const aluno = await prisma.aluno.create({
         data: {
           nome: nomes[t][a],
           matricula: `2026${String(matricula).padStart(3, "0")}`,
           turmaId: turma.id,
           emailResponsavel: `resp${String(matricula).padStart(2, "0")}@email.com`,
+          status,
         },
       });
       const role =
@@ -90,7 +93,7 @@ async function main() {
       matricula++;
     }
   }
-  console.log(`✅ ${matricula - 1} alunos criados`);
+  console.log(`✅ ${matricula - 1} alunos criados (10 INATIVO, ${matricula - 11} ATIVO)`);
 
   // ── Presenças ──────────────────────────────────────────────────────────────
   const dias = diasUteis();

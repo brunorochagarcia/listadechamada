@@ -87,19 +87,17 @@ export default async function DashboardPage({ searchParams }: Props) {
           </p>
         </div>
         <div className="flex gap-3 items-end">
-          <form method="GET" className="flex items-end gap-2">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Data</label>
-              <input
-                name="data"
-                type="date"
-                defaultValue={dataSelecionada}
-                className="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          <form method="GET" className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm">
+            <label className="text-xs font-semibold text-slate-400 whitespace-nowrap">Frequência em</label>
+            <input
+              name="data"
+              type="date"
+              defaultValue={dataSelecionada}
+              className="border border-slate-200 bg-slate-50 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
             <button
               type="submit"
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-md transition-all"
+              className="px-3 py-1 bg-blue-600 text-white rounded-md text-xs font-semibold hover:bg-blue-700 transition-all"
             >
               Consultar
             </button>

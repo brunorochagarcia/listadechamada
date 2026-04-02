@@ -1,9 +1,56 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { calcularFrequencia, calcularSituacao } from "@/lib/utils/frequencia";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+
+export async function buscarRelatorioTurma(id: string) {
+  const inicio = new Date();
+  inicio.setDate(inicio.getDate() - 30);
+  inicio.setHours(0, 0, 0, 0);
+
+  const turma = await prisma.turma.findUnique({
+    where: { id },
+    include: {
+      alunos: {
+        orderBy: { nome: "asc" },
+        include: {
+          presencas: {
+            where: { data: { gte: inicio } },
+            orderBy: { data: "desc" },
+          },
+        },
+      },
+    },
+  });
+
+  if (!turma) return null;
+
+  return {
+    id: turma.id,
+    nome: turma.nome,
+    turno: turma.turno,
+    anoLetivo: turma.anoLetivo,
+    alunos: turma.alunos.map((a) => {
+      const { percentual, presentes, atrasados, ausentes } = calcularFrequencia(a.presencas);
+      const ultimo = a.presencas[0];
+      return {
+        id: a.id,
+        nome: a.nome,
+        matricula: a.matricula,
+        percentual,
+        presentes,
+        atrasados,
+        ausentes,
+        situacao: calcularSituacao(percentual),
+        ultimaData: ultimo ? new Date(ultimo.data).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : null,
+        ultimoStatus: ultimo?.status ?? null,
+      };
+    }),
+  };
+}
 
 const turmaSchema = z.object({
   nome: z.string().min(1, "Nome obrigatório"),
