@@ -4,12 +4,17 @@ Sistema web para gestão de frequência escolar. Permite registrar chamadas por 
 
 ## Funcionalidades
 
-- Registro de chamada por turma e data (presente, ausente, atrasado)
-- Cálculo automático de frequência por aluno
-- Alerta por e-mail ao responsável quando o aluno entra em situação irregular (< 75%)
+- Registro de chamada por turma e data (presente, ausente, atrasado) com contadores em tempo real
+- Cálculo automático de frequência por aluno (exibido como badge na listagem)
+- Alerta automático por e-mail ao responsável quando o aluno entra em situação irregular (< 75%)
+- Notificação manual individual ou em massa diretamente pelo dashboard
 - Relatório individual com calendário visual de presenças
-- Exportação de relatório em PDF e CSV
+- Exportação de relatório em PDF e CSV (individual e lista de irregulares)
 - Gestão de turmas e alunos com upload de foto
+- Criação e edição de turmas e alunos via modal (sem sair da listagem)
+- Relatório de turma acessível via modal com carregamento sob demanda
+- Soft-delete de alunos: desativação mantém o histórico, aluno inativo aparece ao fim da lista
+- Tabela de alunos com ordenação por coluna (asc/desc)
 - Dashboard com resumo diário e alunos em situação irregular
 
 ## Stack
@@ -77,7 +82,7 @@ app/
     alunos/          # Gestão de alunos
     presencas/       # Registro de chamada e histórico
   api/
-    relatorio/       # Exportação PDF e CSV
+    relatorio/       # Exportação PDF e CSV (individual e irregulares)
   login/             # Autenticação
 components/          # Componentes reutilizáveis
 lib/
@@ -95,3 +100,4 @@ prisma/
 - Situação **Irregular**: frequência < 75% — dispara alerta ao responsável
 - Aluno sem registros é tratado como 100% (não aparece como irregular)
 - Não é possível ter dois registros de presença para o mesmo aluno no mesmo dia e turma
+- Alunos desativados (INATIVO) não participam de chamadas e ficam ao fim da lista

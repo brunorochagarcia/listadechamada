@@ -27,7 +27,7 @@ export default async function EditarAlunoPage({ params }: Props) {
           turmaId: aluno.turmaId,
           emailResponsavel: aluno.emailResponsavel,
           fotoUrl: aluno.fotoUrl,
-          status: aluno.status,
+          status: aluno.status === "INATIVO" ? "ATIVO" : aluno.status,
         }}
         action={action}
       />

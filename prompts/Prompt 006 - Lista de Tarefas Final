@@ -1,0 +1,317 @@
+  TODO — Lista de Chamada (do zero ao projeto completo)
+
+  Baseado no PRD final (Prompt 005). Seguir as fases em ordem.
+  Mostrar o que foi feito ao usuário e aguardar aprovação antes de prosseguir para a próxima fase.
+
+  ---
+  FASE 1 — Fundação e Infraestrutura
+
+  1.1 Configuração do Projeto
+
+  - Criar projeto Next.js com TypeScript: npx create-next-app@latest --typescript --tailwind --app
+  - Instalar dependências:
+      prisma @prisma/client @auth/prisma-adapter
+      next-auth@beta
+      zod
+      cloudinary
+      resend
+      @react-pdf/renderer papaparse @types/papaparse
+      sonner
+      lucide-react
+  - Instalar shadcn/ui e adicionar componentes:
+      button, input, select, dialog, badge, card, table, avatar, separator, tooltip
+  - Ajustar tsconfig.json para strict mode
+  - Criar .env com todas as variáveis (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL,
+    CLOUDINARY_*, RESEND_API_KEY, RESEND_FROM_EMAIL)
+  - Criar lib/env.ts: validação de todas as env vars com Zod, exportar objeto tipado
+
+  1.2 Banco de Dados
+
+  - Inicializar Prisma: npx prisma init
+  - Criar schema.prisma com os modelos: User, Turma, Aluno, Presenca
+    - Aluno com campo status StatusAluno (ATIVO | PENDENTE | INATIVO, default ATIVO)
+    - Aluno com campo alertaEnviado (boolean, default false)
+    - Aluno com fotoUrl e fotoPublicId (nullable)
+    - Presenca com @@unique([alunoId, data, turmaId])
+    - Cascade delete: Aluno → Presenca
+  - Executar: npx prisma migrate dev --name init
+  - Criar lib/prisma.ts: singleton PrismaClient
+
+  1.3 Seed
+
+  - Criar prisma/seed.ts:
+    - 1 usuário admin (bcrypt na senha)
+    - 3 turmas (manhã, tarde, noite)
+    - ~21 alunos com perfis variados de frequência
+    - Incluir alguns alunos com status INATIVO para validar soft-delete
+    - Presenças variadas para que alguns alunos fiquem irregulares
+  - Executar: npx prisma db seed
+
+  1.4 Autenticação
+
+  - Criar auth.config.ts: credentials provider (edge-runtime safe, sem Prisma)
+  - Criar auth.ts: NextAuth com PrismaAdapter (Node.js)
+  - Criar app/api/auth/[...nextauth]/route.ts
+  - Criar middleware.ts: proteger todas as rotas exceto /login
+  - Criar app/login/page.tsx + app/login/actions.ts (signIn com Zod, toast de erro)
+  - Testar login, redirect para /dashboard e acesso negado sem sessão
+
+  1.5 Layout Base
+
+  - Criar app/layout.tsx: fontes, Toaster (Sonner)
+  - Criar components/Sidebar.tsx: nav links, fixo em desktop, overlay drawer em mobile
+  - Criar components/Header.tsx: título da página, botão de logout
+  - Criar app/(dashboard)/layout.tsx: layout protegido com Sidebar + Header
+  - Criar app/globals.css: paleta de cores da marca via @theme inline no Tailwind
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 2 — Utilitários e Camada de Dados
+
+  - Criar lib/utils/frequencia.ts
+      calcularFrequencia(presencas): { percentual, total, presentes, atrasados, ausentes }
+      → PRESENTE e ATRASADO contam. 0 registros = 100%.
+      calcularSituacao(percentual): "Regular" | "Irregular" (limiar 75%)
+
+  - Criar lib/api/turmas.ts
+      getTurmas(): todas as turmas com _count de alunos, ordenadas por anoLetivo desc, nome asc
+      getTurmaById(id): turma com _count de alunos
+      getTurmaComRelatorio(id): turma com alunos e presenças dos últimos 30 dias
+
+  - Criar lib/api/alunos.ts
+      getAlunos(search?): todos os alunos com turma, presencas e _count
+      getAlunoById(id): aluno com turma
+      getAlunoComPresencas(id): aluno com todas as presenças (desc)
+
+  - Criar lib/api/presencas.ts
+      getPresencasPorTurmaEData(turmaId, data): presenças de uma turma em uma data
+      getHistoricoPresencas(filtros): paginado, com filtros de turma/aluno/status/data
+
+  - Criar lib/cloudinary.ts: funções uploadFoto(buffer, filename) e deleteFoto(publicId)
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 3 — Módulo de Turmas
+
+  - Criar components/TurmaForm.tsx: formulário compartilhado (nome, turno, anoLetivo) com Zod
+
+  - Criar components/NovaTurmaModal.tsx: Dialog com TurmaForm, chama criarTurma()
+
+  - Criar components/EditarTurmaModal.tsx: Dialog com TurmaForm pré-preenchido, chama editarTurma()
+    → Usar .bind(null, turma.id) para passar id ao action
+
+  - Criar components/RelatorioTurmaModal.tsx: Dialog lazy-load
+    → Chama buscarRelatorioTurma() ao abrir (não recarrega em aperturas subsequentes)
+    → Tabela: nome, presentes, atrasados, ausentes, percentual, situação, último registro
+
+  - Criar components/TurmaDeleteButton.tsx: Dialog de confirmação
+    → Chama excluirTurma(). Exibe toast de erro se turma tiver alunos.
+
+  - Criar app/(dashboard)/turmas/page.tsx (RSC)
+    → Lista vertical com turno badge, ano letivo, contagem de alunos
+    → Botões por turma: RelatorioTurmaModal, EditarTurmaModal, TurmaDeleteButton
+    → Botão "Nova Turma" abre NovaTurmaModal
+
+  - Criar app/(dashboard)/turmas/actions.ts
+      criarTurma(formData): Zod + insert + revalidatePath('/turmas') + redirect
+      editarTurma(id, formData): Zod + update + revalidatePath + redirect
+      excluirTurma(id): checar alunos → delete + revalidatePath ou retornar erro
+      buscarRelatorioTurma(id): buscar dados dos últimos 30 dias e calcular frequência
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 4 — Módulo de Alunos
+
+  - Criar components/AlunoForm.tsx: formulário compartilhado com todos os campos
+    → Área de foto no formato 3x4 sem moldura
+    → Campos: nome, matrícula, turma (select), e-mail responsável, status, foto
+
+  - Criar components/NovoAlunoModal.tsx: Dialog com AlunoForm, chama criarAluno()
+
+  - Criar components/AlunosBusca.tsx (Client Component)
+    → Recebe lista de alunos já com situacao calculada do RSC pai
+    → Busca client-side por nome/matrícula
+    → Colunas sortáveis: nome, matrícula, turma, status, situação
+    → Badges de status (Ativo/Pendente/Inativo) e situação (Regular/Irregular)
+    → Ações por linha: ver relatório, editar, desativar
+
+  - Criar components/AlunoDeleteButton.tsx: Dialog de confirmação de desativação
+    → Chama excluirAluno() que faz soft-delete (status = INATIVO)
+    → Usa router.refresh() após sucesso
+
+  - Criar app/(dashboard)/alunos/page.tsx (RSC)
+    → Buscar alunos com presencas, calcular situacao server-side
+    → Ordenar: ATIVO → PENDENTE → INATIVO
+    → Passar lista para AlunosBusca
+    → Botão "Novo Aluno" abre NovoAlunoModal
+
+  - Criar app/(dashboard)/alunos/[id]/page.tsx (RSC)
+    → Percentual, situação, contagens
+    → CalendarioPresencas
+    → ExportButtons
+
+  - Criar app/(dashboard)/alunos/[id]/editar/page.tsx (RSC + formulário)
+
+  - Criar components/CalendarioPresencas.tsx: grid mensal com bolinhas coloridas por status
+
+  - Criar components/ExportButtons.tsx: botões que abrem /api/relatorio/[id]/pdf e csv
+
+  - Criar app/(dashboard)/alunos/actions.ts
+      criarAluno(formData): Zod + uploadFoto (opcional) + insert. Rollback foto se falhar.
+      editarAluno(id, formData): Zod + troca de foto (deletar anterior) + update.
+      excluirAluno(id): update status = INATIVO + revalidatePath('/alunos')
+    → Tratar P2002 (matrícula duplicada) como toast amigável
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 5 — Módulo de Presenças
+
+  5.1 Registro de Chamada
+
+  - Criar components/PresencaForm.tsx (Client Component)
+    → Props: turmaId, turmaNome, data, alunos[], presencasExistentes{}
+    → Estado local: registros (Record<alunoId, StatusPresenca>), padrão PRESENTE para todos
+    → Busca client-side por nome/matrícula
+    → Contadores em tempo real: Presentes / Ausentes / Atrasados em caixas coloridas
+    → Toggle de 3 botões por aluno: PRESENTE (verde), AUSENTE (vermelho), ATRASADO (âmbar)
+    → Footer flutuante fixo com total e botão "Finalizar Chamada"
+    → Chama salvarChamada() e mostra toast
+
+  - Criar app/(dashboard)/presencas/page.tsx (RSC)
+    → Ler turmaId e data dos URL params (padrão: hoje)
+    → Buscar apenas alunos ATIVOS da turma
+    → Buscar presencasExistentes para pré-preencher
+    → Renderizar seletor de turma/data + PresencaForm
+
+  - Criar app/(dashboard)/presencas/actions.ts
+      salvarChamada({ turmaId, data, registros[] }): upsert em transação + recalcularAlertas()
+      recalcularAlertas(alunoIds[]): calcular frequência de cada aluno → enviar/resetar alertas
+
+  5.2 Histórico
+
+  - Criar components/FiltroPresenca.tsx (Client): selects de turma, status, datas, busca por aluno
+  - Criar app/(dashboard)/presencas/historico/page.tsx (RSC): listagem paginada com filtros
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 6 — Notificações por E-mail
+
+  - Criar lib/email/resend.ts: instância do cliente Resend (new Resend(env.RESEND_API_KEY))
+
+  - Criar lib/email/alertaFrequencia.ts
+      templateAlerta(aluno, percentual): string → HTML com header vermelho, dados do aluno
+      enviarAlertaFrequencia(aluno, percentual): enviar via Resend
+      → Guard: se RESEND_API_KEY não configurada, loga aviso e retorna sem erro
+
+  - Integrar em recalcularAlertas (presencas/actions.ts):
+    → percentual < 75% e alertaEnviado === false → enviar + setar alertaEnviado = true
+    → percentual >= 75% e alertaEnviado === true → resetar alertaEnviado = false
+
+  - Criar components/NotificarButton.tsx (Client)
+    → Props: id, temEmail. Desabilitado se não tiver e-mail.
+    → Chama notificarAluno() do dashboard/actions.ts. Toast de feedback.
+
+  - Criar components/NotificarTodosButton.tsx (Client)
+    → Chama notificarTodos() do dashboard/actions.ts
+    → Toast com número de alertas enviados
+
+  - Criar app/(dashboard)/dashboard/actions.ts
+      notificarAluno(id): calcular frequência → enviar alerta → setAlertaEnviado = true → revalidate
+      notificarTodos(): buscar todos os irregulares → enviar para cada um → retornar { enviados }
+
+  - Testar envio e controle de reenvio (alertaEnviado)
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 7 — Dashboard
+
+  - Criar app/(dashboard)/dashboard/page.tsx (RSC)
+    → Filtro de data via URL param (padrão: hoje)
+    → Cards de métricas: total de alunos, % de presença no dia, total de irregulares
+    → Resumo por turma: barras de progresso de presença para a data selecionada
+    → Bloco de alunos irregulares: tabela com nome, turma, frequência, NotificarButton
+    → NotificarTodosButton e ExportIrregularesButton acima da tabela
+
+  - Criar components/ExportIrregularesButton.tsx (Client)
+    → Abre /api/relatorio/irregulares/pdf em nova aba
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 8 — Exportações
+
+  - Criar lib/export/pdf.tsx
+    → Layout individual com @react-pdf/renderer: dados do aluno, tabela de presenças, frequência
+    → Layout de irregulares: tabela com nome, turma, frequência, situação
+
+  - Criar app/api/relatorio/[id]/pdf/route.ts
+    → GET: buscar aluno com presenças → renderToBuffer → Content-Disposition: attachment
+
+  - Criar app/api/relatorio/[id]/csv/route.ts
+    → GET: buscar presenças → PapaParse.unparse → Content-Disposition: attachment
+
+  - Criar app/api/relatorio/irregulares/pdf/route.ts
+    → GET: buscar todos os alunos → calcular frequência → filtrar < 75% → gerar PDF
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 9 — Qualidade e Polimento
+
+  - Adicionar loading.tsx nas rotas principais (dashboard, turmas, alunos, presencas)
+  - Adicionar error.tsx com detecção de banco indisponível e mensagens amigáveis
+  - Adicionar not-found.tsx para aluno/turma inexistentes
+  - Revisar mensagens de erro e toasts em todos os formulários e actions
+  - Revisar responsividade mobile (sidebar drawer, tabelas em telas pequenas)
+  - Revisar todos os revalidatePath (garantir granularidade cirúrgica)
+  - Revisar e ajustar datas: armazenamento como Date, exibição com timeZone: "UTC"
+  - Testar fluxo completo do zero: criar turma → aluno → chamada → irregularidade → alerta
+
+  Mostrar o que foi feito, explicar e aguardar aprovação antes de prosseguir.
+
+  ---
+  FASE 10 — Deploy
+
+  - Push para repositório GitHub
+  - Criar projeto na Vercel e conectar ao repo
+  - Configurar variáveis de ambiente na Vercel (todas do .env)
+  - Provisionar PostgreSQL em produção (Neon, Supabase ou Railway)
+  - Executar: npx prisma migrate deploy
+  - Executar seed em produção se necessário
+  - Validar domínio de envio no Resend (RESEND_FROM_EMAIL)
+  - Testar fluxo completo em produção
+
+  Mostrar o que foi feito, explicar e aguardar aprovação.
+
+  ---
+  Sequência de Dependências
+
+  ┌──────────────────────────────┬──────────────────────┐
+  │             Fase             │      Depende de       │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 1 — Fundação                 │ —                    │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 2 — Utilitários              │ 1                    │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 3 — Turmas                   │ 1, 2                 │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 4 — Alunos                   │ 1, 2, 3              │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 5 — Presenças                │ 1, 2, 3, 4           │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 6 — E-mail                   │ 5                    │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 7 — Dashboard                │ 5, 6                 │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 8 — Exportações              │ 4, 5                 │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 9 — Qualidade e Polimento    │ 3 → 8                │
+  ├──────────────────────────────┼──────────────────────┤
+  │ 10 — Deploy                  │ 9                    │
+  └──────────────────────────────┴──────────────────────┘

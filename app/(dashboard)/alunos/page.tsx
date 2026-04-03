@@ -26,7 +26,7 @@ export default async function AlunosPage() {
         <NovoAlunoModal turmas={turmas} />
       </div>
 
-      <AlunosBusca alunos={alunosComSituacao} />
+      <AlunosBusca alunos={alunosComSituacao} turmas={turmas} />
     </div>
   );
 }

@@ -3,13 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AlunoDeleteButton } from "@/app/(dashboard)/alunos/AlunoDeleteButton";
-import { Pencil, BarChart2, CheckCircle2, AlertCircle, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { EditarAlunoModal } from "@/components/EditarAlunoModal";
+import { BarChart2, CheckCircle2, AlertCircle, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+type Turma = { id: string; nome: string; turno: string; anoLetivo: string };
 
 type Aluno = {
   id: string;
   nome: string;
   matricula: string;
+  turmaId: string;
   emailResponsavel: string;
   fotoUrl: string | null;
   status: "ATIVO" | "PENDENTE" | "INATIVO";
@@ -43,7 +47,7 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
     : <ChevronDown size={13} className="text-blue-500" />;
 }
 
-export function AlunosBusca({ alunos }: { alunos: Aluno[] }) {
+export function AlunosBusca({ alunos, turmas }: { alunos: Aluno[]; turmas: Turma[] }) {
   const [busca, setBusca] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("nome");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -168,9 +172,7 @@ export function AlunosBusca({ alunos }: { alunos: Aluno[] }) {
                       <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/alunos/${aluno.id}`} />} title="Ver relatório">
                         <BarChart2 size={15} />
                       </Button>
-                      <Button variant="ghost" size="icon" nativeButton={false} render={<Link href={`/alunos/${aluno.id}/editar`} />}>
-                        <Pencil size={15} />
-                      </Button>
+                      <EditarAlunoModal aluno={aluno} turmas={turmas} />
                       <AlunoDeleteButton id={aluno.id} nome={aluno.nome} presencasCount={aluno._count.presencas} />
                     </div>
                   </td>

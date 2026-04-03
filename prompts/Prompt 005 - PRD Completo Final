@@ -1,0 +1,400 @@
+  PRD — Lista de Chamada (estado final do projeto)
+
+  ---
+  1. Visão Geral do Produto
+
+  Nome: Lista de Chamada
+  Tipo: Aplicação Web — Painel Administrativo Escolar
+  Objetivo: Digitalizar e centralizar o controle de presença de alunos, oferecendo registro
+  diário por turma, relatórios individuais exportáveis, dashboard com visão agregada e
+  alertas automáticos e manuais por e-mail aos responsáveis.
+
+  ---
+  2. Contexto e Problema
+
+  Escolas que ainda utilizam planilhas ou registros físicos enfrentam dificuldade em
+  acompanhar frequência em tempo real, identificar alunos em risco de reprovação por falta
+  e notificar responsáveis proativamente. Este sistema resolve esses problemas com uma
+  interface web moderna, registro simplificado por turma e alertas automáticos e manuais
+  por e-mail.
+
+  ---
+  3. Usuários e Papéis
+
+  ┌───────────────┬─────────────────────────────────────────────────────────────────────┐
+  │     Papel     │                              Descrição                               │
+  ├───────────────┼─────────────────────────────────────────────────────────────────────┤
+  │ Administrador │ Único perfil. Gerencia turmas, alunos, registra chamadas e relatórios │
+  ├───────────────┼─────────────────────────────────────────────────────────────────────┤
+  │ Responsável   │ Não acessa o sistema. Recebe alertas por e-mail                      │
+  └───────────────┴─────────────────────────────────────────────────────────────────────┘
+
+  Autenticação via NextAuth com credentials provider. Senha armazenada com bcrypt.
+  JWT session. Todas as rotas internas protegidas via middleware.
+  Modelo de User preparado para suportar múltiplos perfis no futuro (campo role).
+
+  ---
+  4. Regras de Negócio
+
+  ┌────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │   #    │                                                           Regra                                                                                                       │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-01  │ Frequência = (PRESENTE + ATRASADO) / total de registros. AUSENTE não conta.                                                                                           │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-02  │ Situação Regular: frequência >= 75%. Situação Irregular: frequência < 75%.                                                                                            │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-03  │ Aluno sem registros de presença é tratado como 100% (não aparece como irregular).                                                                                     │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-04  │ Não é permitido registro duplicado de presença para o mesmo aluno na mesma data e turma.                                                                              │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-05  │ A matrícula do aluno deve ser única no sistema.                                                                                                                        │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-06  │ Foto do aluno removida deve ser excluída também no Cloudinary via publicId.                                                                                            │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-07  │ Ao salvar chamada que faz aluno cruzar limiar de 75%, e-mail de alerta é enviado automaticamente ao responsável.                                                       │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-08  │ E-mail automático enviado uma única vez por ciclo de irregularidade. Flag alertaEnviado controla o reenvio. Resetada quando aluno volta a Regular.                     │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-09  │ Soft-delete de aluno: ao "excluir", o status é definido como INATIVO. Histórico de presenças é preservado. Aluno inativo vai ao fim da lista.                         │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-10  │ Alunos INATIVO não aparecem na lista de chamada.                                                                                                                       │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-11  │ Exclusão de turma bloqueada se houver alunos vinculados.                                                                                                               │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RN-12  │ Relatório de turma abrange os últimos 30 dias dinamicamente.                                                                                                           │
+  └────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  5. Requisitos Funcionais
+
+  5.1 Autenticação
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                              Requisito                                   │
+  ├───────┼──────────────────────────────────────────────────────────────────────────┤
+  │ RF-01 │ Login com e-mail e senha via NextAuth credentials provider               │
+  ├───────┼──────────────────────────────────────────────────────────────────────────┤
+  │ RF-02 │ Sessão JWT. Redirecionamento automático para /dashboard após login        │
+  ├───────┼──────────────────────────────────────────────────────────────────────────┤
+  │ RF-03 │ Middleware protege todas as rotas exceto /login                           │
+  ├───────┼──────────────────────────────────────────────────────────────────────────┤
+  │ RF-04 │ auth.config.ts é edge-runtime safe; auth.ts é Node.js (server actions)   │
+  └───────┴──────────────────────────────────────────────────────────────────────────┘
+
+  5.2 Gestão de Turmas
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                                                          Requisito                                                                                                     │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-05 │ Listar turmas em lista vertical com turno, ano letivo e contagem de alunos                                                                                             │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-06 │ Criar turma via modal (NovaTurmaModal) com campos: nome, turno (MANHA/TARDE/NOITE), ano letivo                                                                         │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-07 │ Editar turma via modal (EditarTurmaModal) com pré-preenchimento dos dados atuais                                                                                        │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-08 │ Excluir turma com confirmação em modal. Bloqueio se turma tiver alunos vinculados                                                                                       │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-09 │ Relatório de turma acessível via modal (RelatorioTurmaModal) com carregamento sob demanda. Exibe frequência individual dos últimos 30 dias                              │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  5.3 Gestão de Alunos
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                                                          Requisito                                                                                                     │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-10 │ Listar alunos com busca por nome ou matrícula (client-side) e ordenação por qualquer coluna (asc/desc)                                                                 │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-11 │ Exibir situação de frequência (Regular/Irregular) como badge calculado server-side na listagem                                                                          │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-12 │ Criar aluno via modal (NovoAlunoModal) com campos: nome, matrícula, turma, e-mail do responsável, foto (opcional)                                                       │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-13 │ Editar aluno via modal (EditarAlunoModal) com pré-preenchimento. Substituição de foto remove a anterior do Cloudinary                                                    │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-14 │ Soft-delete: ao desativar aluno, status é definido como INATIVO com histórico preservado. Confirmação via modal                                                         │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-15 │ Matrícula única: erro P2002 do Prisma tratado e exibido como toast amigável                                                                                            │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-16 │ Upload de foto via Cloudinary, limite de 5MB. Armazenar fotoUrl e fotoPublicId. Rollback do Cloudinary se o insert falhar                                               │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  5.4 Registro de Chamada
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                                                          Requisito                                                                                                     │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-17 │ Selecionar turma e data via URL params. Atualização automática ao mudar seleção                                                                                        │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-18 │ Carregar apenas alunos ATIVOS da turma selecionada                                                                                                                     │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-19 │ Pré-preencher status se chamada já foi salva para a data/turma. Permite corrigir chamada passada                                                                        │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-20 │ Toggle de status por aluno: PRESENTE (verde), AUSENTE (vermelho), ATRASADO (âmbar). Padrão inicial: PRESENTE                                                            │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-21 │ Contadores em tempo real de presentes/ausentes/atrasados atualizados conforme o admin marca a chamada                                                                   │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-22 │ Busca por nome/matrícula dentro da lista de chamada (client-side)                                                                                                      │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-23 │ Salvar via upsert: constraint única [alunoId, data, turmaId] impede duplicatas e permite correção                                                                       │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-24 │ Após salvar, recalcular frequência e disparar alertas de e-mail conforme RN-07/RN-08                                                                                   │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  5.5 Histórico de Presenças
+
+  ┌───────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                                              Requisito                                                      │
+  ├───────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-25 │ Listagem paginada de presenças com filtros: aluno, turma, status, intervalo de datas                        │
+  ├───────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-26 │ Paginação via URL query params (?page=1). Contagem total em transação única com os registros                │
+  └───────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  5.6 Dashboard
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                                                          Requisito                                                                                                     │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-27 │ Cards de métricas do dia: total de alunos, percentual de presença, total de irregulares                                                                                │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-28 │ Resumo de chamada por turma para a data selecionada (barras visuais de progresso)                                                                                      │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-29 │ Tabela de alunos em situação irregular com botão individual de notificação por aluno                                                                                   │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-30 │ Botão "Alertar Responsáveis" para envio em massa de e-mail a todos os alunos irregulares de uma vez                                                                    │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-31 │ Botão para exportar lista de irregulares em PDF (/api/relatorio/irregulares/pdf)                                                                                        │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-32 │ Filtro de data no dashboard (padrão: hoje). Dados carregados server-side                                                                                               │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  5.7 Relatório Individual do Aluno
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                                                          Requisito                                                                                                     │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-33 │ Percentual de frequência, situação (Regular/Irregular), contagem de presentes/atrasados/ausentes                                                                       │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-34 │ Calendário visual mensal com bolinhas coloridas por status (verde/vermelho/âmbar)                                                                                      │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-35 │ Exportação em PDF via /api/relatorio/[id]/pdf (gerado com @react-pdf/renderer, download como attachment)                                                               │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-36 │ Exportação em CSV via /api/relatorio/[id]/csv (gerado com PapaParse, download como attachment)                                                                         │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  5.8 Notificações por E-mail
+
+  ┌───────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  ID   │                                                          Requisito                                                                                                     │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-37 │ Alerta automático: disparado ao salvar chamada que faz aluno cruzar limiar (RN-07/RN-08)                                                                               │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-38 │ Alerta manual individual: botão "Notificar" por aluno no dashboard. Desabilitado se não tiver e-mail                                                                   │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-39 │ Alerta manual em massa: botão "Alertar Responsáveis" envia para todos os irregulares de uma vez                                                                        │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-40 │ E-mail contém: nome do aluno, matrícula, turma, percentual atual, mínimo (75%) e situação (Irregular)                                                                  │
+  ├───────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RF-41 │ Guard no serviço de e-mail: se RESEND_API_KEY não estiver configurada, loga aviso e não falha                                                                          │
+  └───────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  6. Requisitos Não Funcionais
+
+  ┌────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │   ID   │                                                         Requisito                                                                                                      │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RNF-01 │ Validação de todos os dados de entrada no servidor com Zod                                                                                                             │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RNF-02 │ Variáveis de ambiente tipadas e validadas em lib/env.ts com Zod. Falha explícita em startup se variável faltar                                                         │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RNF-03 │ Feedback visual via toasts (Sonner) em todas as ações. Estados de loading explícitos nos botões                                                                        │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RNF-04 │ Páginas com loading.tsx, error.tsx e not-found.tsx nas rotas principais                                                                                                │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RNF-05 │ Aplicação responsiva. Sidebar: fixo em desktop, overlay drawer em mobile                                                                                               │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RNF-06 │ Datas armazenadas como tipo Date (sem horário). Exibição com timeZone: "UTC" para evitar bugs de offset                                                                │
+  ├────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ RNF-07 │ Revalidação de cache cirúrgica (revalidatePath) após cada mutação, não global                                                                                          │
+  └────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  7. Stack Tecnológica
+
+  ┌────────────────────┬──────────────────────────────────────────────────────┐
+  │       Camada       │                     Tecnologia                       │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Framework          │ Next.js 16+ (App Router, Server Actions, RSC)        │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Linguagem          │ TypeScript (strict mode)                              │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Banco de Dados     │ PostgreSQL + Prisma ORM (com PrismaPg adapter)       │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Autenticação       │ NextAuth v5 beta (credentials provider, JWT)         │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ UI                 │ Tailwind CSS v4 + shadcn/ui + Lucide icons           │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Toasts             │ Sonner                                                │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Upload de Fotos    │ Cloudinary (fotoUrl + fotoPublicId para cleanup)     │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ E-mail             │ Resend                                                │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Exportação PDF     │ @react-pdf/renderer (renderToBuffer server-side)     │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Exportação CSV     │ PapaParse                                             │
+  ├────────────────────┼──────────────────────────────────────────────────────┤
+  │ Validação          │ Zod (schemas + env vars)                              │
+  └────────────────────┴──────────────────────────────────────────────────────┘
+
+  ---
+  8. Modelo de Dados
+
+  User
+    id, nome, email (unique), senha (hash bcrypt), role (ADMIN), createdAt, updatedAt
+
+  Turma
+    id, nome, turno (MANHA | TARDE | NOITE), anoLetivo, createdAt, updatedAt
+    relações: alunos[], presencas[]
+
+  Aluno
+    id, nome, matricula (unique), turmaId → Turma, emailResponsavel
+    fotoUrl (nullable), fotoPublicId (nullable)
+    status (ATIVO | PENDENTE | INATIVO, default: ATIVO)
+    alertaEnviado (boolean, default: false)
+    createdAt, updatedAt
+    relações: turma, presencas[]
+
+  Presenca
+    id, alunoId → Aluno (cascade delete), turmaId → Turma
+    data (Date, sem horário), status (PRESENTE | AUSENTE | ATRASADO)
+    createdAt, updatedAt
+    @@unique([alunoId, data, turmaId])
+
+  Detalhes importantes:
+  - alertaEnviado: true quando alerta enviado. Reset para false ao voltar a Regular.
+  - Cascade: excluir Aluno remove todas as Presencas. Excluir Turma é bloqueado se houver Alunos.
+  - StatusAluno: alunos INATIVO ficam no banco (soft-delete), histórico preservado.
+
+  ---
+  9. Arquitetura e Padrões de Implementação
+
+  Fluxo geral:
+    Navegador
+       ↓ Server Components (busca dados direto no banco, sem API intermediária)
+       ↓ Client Components (interação: toggles, busca, modais, contadores)
+       ↓ Server Actions ("use server" — mutações, validação Zod, revalidatePath)
+       ↓ Prisma ORM
+       ↓ PostgreSQL
+
+  Padrões aplicados:
+  - Mutações via Server Actions. Leitura via RSC (React Server Components).
+  - Listagens com busca/ordenação em Client Component (dados já carregados pelo RSC pai).
+  - Modais para criação e edição de turmas, criação de aluno. Edição de aluno em página dedicada.
+  - Relatório de turma em modal com carregamento sob demanda (server action chamada pelo cliente).
+  - IDs passados para actions via .bind(null, id) — padrão para formulários sem campos hidden.
+  - Exportações via Route Handlers (GET) retornando Buffer com Content-Disposition: attachment.
+  - auth.config.ts (edge-runtime, usado no middleware). auth.ts (Node.js, usado nas server actions).
+  - lib/env.ts valida todas as env vars com Zod no startup.
+  - Paginação via URL query params. Contagem e registros em única transação Prisma.
+
+  ---
+  10. Estrutura de Páginas, Componentes e Lib
+
+  app/
+  ├── (dashboard)/
+  │   ├── layout.tsx                        # Layout protegido com Sidebar + Header
+  │   ├── dashboard/
+  │   │   ├── page.tsx                      # RSC: métricas, irregulares, chamada por turma
+  │   │   └── actions.ts                    # notificarAluno(), notificarTodos()
+  │   ├── turmas/
+  │   │   ├── page.tsx                      # RSC: lista de turmas
+  │   │   └── actions.ts                    # criarTurma(), editarTurma(), excluirTurma(), buscarRelatorioTurma()
+  │   ├── alunos/
+  │   │   ├── page.tsx                      # RSC: lista com frequência calculada
+  │   │   ├── [id]/page.tsx                 # RSC: relatório individual + calendário
+  │   │   ├── [id]/editar/page.tsx          # RSC: formulário de edição
+  │   │   └── actions.ts                    # criarAluno(), editarAluno(), excluirAluno() (soft-delete)
+  │   └── presencas/
+  │       ├── page.tsx                      # RSC: seleção turma/data + PresencaForm
+  │       ├── historico/page.tsx            # RSC: histórico com filtros e paginação
+  │       └── actions.ts                    # salvarChamada() + recalcularAlertas() (interna)
+  ├── api/
+  │   ├── auth/[...nextauth]/route.ts
+  │   ├── relatorio/[id]/pdf/route.ts       # GET → PDF individual
+  │   ├── relatorio/[id]/csv/route.ts       # GET → CSV individual
+  │   └── relatorio/irregulares/pdf/route.ts # GET → PDF lista de irregulares
+  └── login/
+      ├── page.tsx
+      └── actions.ts
+
+  components/
+  ├── Sidebar.tsx                           # Fixo (desktop) / overlay drawer (mobile)
+  ├── Header.tsx
+  ├── AlunoForm.tsx                         # Formulário compartilhado (criar/editar)
+  ├── TurmaForm.tsx                         # Formulário compartilhado (criar/editar)
+  ├── AlunosBusca.tsx                       # Client: busca, ordenação, tabela de alunos
+  ├── PresencaForm.tsx                      # Client: toggles por aluno, contadores em tempo real
+  ├── CalendarioPresencas.tsx               # Calendário visual mensal por status
+  ├── StatusBadge.tsx                       # Badge colorido por status de presença
+  ├── ExportButtons.tsx                     # Botões PDF + CSV individual
+  ├── ExportIrregularesButton.tsx           # Botão PDF de todos os irregulares
+  ├── NotificarButton.tsx                   # Client: notificar aluno individual
+  ├── NotificarTodosButton.tsx              # Client: notificar todos os irregulares
+  ├── NovoAlunoModal.tsx                    # Modal: criar aluno
+  ├── EditarAlunoModal.tsx                  # Modal: editar aluno
+  ├── NovaTurmaModal.tsx                    # Modal: criar turma
+  ├── EditarTurmaModal.tsx                  # Modal: editar turma
+  ├── RelatorioTurmaModal.tsx               # Modal: relatório 30 dias da turma (lazy load)
+  ├── AlunoDeleteButton.tsx                 # Modal confirmação + soft-delete
+  ├── TurmaDeleteButton.tsx                 # Modal confirmação + delete (com guard)
+  ├── FiltroPresenca.tsx                    # Filtros de histórico de presença
+  └── ui/                                   # Componentes shadcn/ui
+
+  lib/
+  ├── prisma.ts                             # Singleton PrismaClient
+  ├── env.ts                                # Validação de env vars com Zod
+  ├── utils.ts                              # Utilitários gerais
+  ├── cloudinary.ts                         # Upload e delete de fotos
+  ├── api/
+  │   ├── turmas.ts                         # getTurmas(), getTurmaById(), getTurmaComRelatorio()
+  │   ├── alunos.ts                         # getAlunos(), getAlunoById(), getAlunoComPresencas()
+  │   └── presencas.ts                      # getPresencasPorTurmaEData(), getHistoricoPresencas()
+  ├── email/
+  │   ├── resend.ts                         # Instância do cliente Resend
+  │   └── alertaFrequencia.ts               # templateAlerta() + enviarAlertaFrequencia()
+  ├── export/
+  │   └── pdf.tsx                           # Layouts @react-pdf/renderer (individual + irregulares)
+  └── utils/
+      └── frequencia.ts                     # calcularFrequencia() + calcularSituacao()
+
+  prisma/
+  ├── schema.prisma
+  └── seed.ts                               # Seed com admin, turmas e alunos variados (incluindo INATIVO)
+
+  ---
+  11. Variáveis de Ambiente Necessárias
+
+  DATABASE_URL=postgresql://user:password@localhost:5432/listadechamada
+  NEXTAUTH_SECRET=secret-longo-aqui
+  NEXTAUTH_URL=http://localhost:3000
+  CLOUDINARY_CLOUD_NAME=
+  CLOUDINARY_API_KEY=
+  CLOUDINARY_API_SECRET=
+  RESEND_API_KEY=
+  RESEND_FROM_EMAIL=noreply@seudominio.com
+
+  ---
+  12. Fora de Escopo (versão atual)
+
+  - Múltiplos perfis de usuário (professores, coordenadores)
+  - Portal do responsável
+  - Notificações push ou SMS
+  - Integração com sistemas de gestão escolar externos
+  - Lançamento de notas
+  - Importação em lote de alunos via CSV
+  - Relatório de turma exportável (disponível apenas via modal, não como download)
+
+  ---
+
+  Criar o projeto com essas configurações e criar o arquivo PRD. Aguardar aprovação antes de prosseguir.

@@ -1,0 +1,374 @@
+
+  HISTÓRICO DE CONSTRUÇÃO — Lista de Chamada
+  Da ideia inicial ao estado atual do projeto
+
+  ---
+
+  ORIGEM DA IDEIA
+  ───────────────
+
+  O projeto nasceu de uma necessidade prática: escolas que ainda usam papel ou planilhas
+  para registrar chamadas não têm como acompanhar a frequência dos alunos em tempo real,
+  e os responsáveis só ficam sabendo de um problema quando já é tarde. A proposta foi
+  construir um sistema web que digitalizasse esse processo de ponta a ponta.
+
+  O ponto de partida foi um prompt descrevendo o problema e a stack desejada (Prompt 001).
+  Antes de escrever uma linha de código, foi feita uma rodada de perguntas para alinhar
+  decisões de produto que impactariam a arquitetura:
+
+  Pergunta                                        Decisão tomada
+  ──────────────────────────────────────────────  ───────────────────────────────────────────────
+  Turma é campo de texto ou entidade no banco?    Entidade própria com CRUD separado
+  E-mails enviados em qual situação?              Quando o aluno cair abaixo de 75% de frequência
+  Um ou múltiplos usuários?                       Único admin por ora, arquitetura preparada para mais
+  Busca de alunos na chamada ou lista por turma?  Ambos: lista pré-carregada por turma + busca
+  Relatório apenas visualização ou exportável?    Exportável (PDF e CSV)
+
+  Com essas respostas em mãos (Prompt 002), foi produzido um PRD detalhado (Prompt 003)
+  e a lista de tarefas faseada (Prompt 004) que guiou toda a construção inicial.
+
+  ---
+
+  16 DE MARÇO DE 2026 — O DIA QUE O PROJETO NASCEU
+  ──────────────────────────────────────────────────
+
+  Toda a base do projeto foi construída em um único dia, seguindo as fases da lista de
+  tarefas à risca. Os commits mostram a progressão fase a fase:
+
+  Commit inicial
+  O projeto começou com "Initial commit from Create Next App" — o scaffolding padrão do
+  Next.js. Na sequência, um segundo commit ("feat: initial commit") configurou a estrutura
+  base: TypeScript strict mode, Tailwind CSS v4, shadcn/ui e a organização de pastas do
+  App Router.
+
+  Fase 1 — Fundação e Infraestrutura (31 arquivos, 2.432 linhas adicionadas)
+  A maior fase em volume de código. Aqui foram criadas todas as peças de infraestrutura:
+  - lib/env.ts: validação das variáveis de ambiente com Zod logo na inicialização
+  - auth.config.ts e auth.ts: autenticação separada em dois arquivos porque o middleware
+    roda no edge runtime (sem Node.js), então a config precisa ser compatível; as server
+    actions usam o auth.ts com o adaptador Prisma completo
+  - middleware.ts: proteção de todas as rotas exceto /login
+  - app/login: página de login com Server Action e validação Zod
+  - Layout base com Sidebar e Header
+  - Sidebar já preparado para funcionar como fixo em desktop e como drawer em mobile
+
+  Fase 2 — Utilitários e Camada de Dados (4 arquivos, 115 linhas)
+  Antes de qualquer interface, a camada de lógica e acesso ao banco foi construída de
+  forma isolada e testável:
+  - lib/utils/frequencia.ts: a regra de negócio mais importante do sistema.
+    PRESENTE e ATRASADO contam como presença. AUSENTE não conta.
+    Aluno sem nenhum registro retorna 100% (não aparece como irregular).
+    Limiar de irregularidade: 75%.
+  - lib/api/turmas.ts, alunos.ts, presencas.ts: funções de query ao banco,
+    sem lógica de negócio, apenas acesso ao Prisma
+
+  Banco de Dados (schema + seed, 3 arquivos, 478 linhas)
+  O schema foi criado com atenção especial às constraints:
+  - matricula com @unique no modelo Aluno
+  - @@unique([alunoId, data, turmaId]) no modelo Presenca — impede chamada duplicada
+  - Cascade delete: excluir aluno remove todas as presenças. Excluir turma é bloqueado.
+  O seed criou 3 turmas, 21 alunos com perfis variados de frequência e um usuário admin,
+  permitindo demonstrar todas as situações do sistema imediatamente.
+
+  Fase 3 — Módulo de Turmas (7 arquivos, 367 linhas)
+  Primeiras páginas funcionais: listagem, criação (página dedicada), edição e exclusão.
+  A exclusão já nasceu bloqueada se a turma tiver alunos. Modal de confirmação
+  implementado como componente reutilizável (ConfirmModal).
+
+  Fase 4 — Módulo de Alunos (8 arquivos, 473 linhas)
+  O módulo mais rico do sistema nessa fase:
+  - Criação com upload de foto via Cloudinary (fotoUrl + fotoPublicId armazenados)
+  - Rollback implementado: se o insert no banco falhar depois do upload, a foto é
+    removida do Cloudinary — sem lixo acumulado
+  - Edição com substituição de foto: anterior deletada do Cloudinary antes do novo upload
+  - Exclusão com modal de confirmação
+  - Tratamento do erro P2002 do Prisma (matrícula duplicada) convertido em toast amigável
+  - Busca por nome ou matrícula via URL params
+
+  Fase 5 — Módulo de Presenças (6 arquivos, 475 linhas)
+  O coração do sistema: o registro de chamada.
+  - Seleção de turma e data via URL params — navegar pelo histórico só muda a URL
+  - Alunos carregados automaticamente pela turma selecionada
+  - Status por aluno: PRESENTE (verde), AUSENTE (vermelho), ATRASADO (âmbar)
+  - Pré-preenchimento quando chamada já foi salva, permitindo corrigir chamadas passadas
+  - Upsert no banco: se já existe registro, atualiza; se não, cria. A constraint única
+    garante que nunca haverá duplicata independente de falha na camada de aplicação
+  - Histórico com filtros (turma, aluno, status, datas) e paginação via URL params
+
+  Fase 6 — Notificações por E-mail (3 arquivos, 69 linhas)
+  A lógica de alerta foi integrada dentro da server action de salvar chamada:
+  - Após persistir as presenças, recalcula frequência de cada aluno afetado
+  - Se cruzou o limiar de 75% e alertaEnviado === false: envia e-mail + seta flag true
+  - Se voltou a >= 75% e alertaEnviado === true: reseta flag para false
+  Esse ciclo garante que o responsável é notificado uma vez por período de irregularidade,
+  e pode ser notificado novamente se o aluno melhorar e piorar de novo.
+
+  Fase 7 — Dashboard (1 arquivo, 110 linhas)
+  Página de visão geral com totais do dia e lista de alunos em situação irregular.
+  Construída como Server Component puro — todos os dados calculados no servidor.
+
+  Fase 8 — Relatório Individual e Exportação (5 arquivos, 309 linhas)
+  - Página do aluno: percentual de frequência, situação, contagens e histórico completo
+  - PDF gerado server-side com @react-pdf/renderer via Route Handler GET
+    (Content-Disposition: attachment força download direto)
+  - CSV gerado com PapaParse via Route Handler GET
+
+  Fase 9 — Qualidade e Polimento (9 arquivos, 222 linhas)
+  - loading.tsx, error.tsx e not-found.tsx adicionados nas rotas principais
+  - Responsividade revisada
+  - Mensagens de erro revisadas em todos os formulários
+
+  ---
+
+  23 DE MARÇO DE 2026 — FASE 10: REFINAMENTOS DE UX
+  ───────────────────────────────────────────────────
+
+  Uma semana depois, uma fase extra não prevista originalmente na lista de tarefas:
+  "fase 10 — página de turma, busca de alunos e ajustes gerais"
+  13 arquivos modificados, 398 linhas adicionadas.
+
+  O que mudou:
+  - Criada página de detalhe da turma (/turmas/[id]) com visão geral dos alunos
+  - Busca de alunos melhorada com mais opções de filtro
+  - Ajustes gerais de UX baseados no uso real do sistema
+
+  ---
+
+  30 DE MARÇO DE 2026 — FEEDBACKS VISUAIS E REATIVIDADE
+  ───────────────────────────────────────────────────────
+
+  "feat: feedbacks visuais e carregamento reativo no módulo de presença"
+  16 arquivos modificados, 406 linhas alteradas — a maior revisão até então.
+
+  O formulário de chamada (PresencaForm) recebeu uma reformulação expressiva:
+  - O componente passou a ser mais reativo visualmente durante o preenchimento
+  - Estados de carregamento adicionados em botões e ações
+  - Feedbacks de sucesso e erro revisados para serem mais precisos e informativos
+  Essa iteração foi motivada pelo uso real: o sistema funcionava corretamente, mas
+  a experiência de preencher uma chamada para uma turma inteira era monótona e sem
+  indicação de progresso.
+
+  ---
+
+  31 DE MARÇO DE 2026 — CALENDÁRIO, REFATORAÇÃO E DOCUMENTAÇÃO
+  ──────────────────────────────────────────────────────────────
+
+  Três commits nesse dia, do mais técnico ao mais documental:
+
+  1. "feat: calendário de presenças, refatoração de frequência e melhoria de erros"
+     9 arquivos, 154 linhas adicionadas.
+     - Criado CalendarioPresencas.tsx: visualização mensal com bolinhas coloridas
+       por status — cada dia com registro ganha um indicador visual na grade do mês
+     - lib/utils/frequencia.ts refatorada para retornar mais informações estruturadas
+       (percentual, total, presentes, atrasados, ausentes em um único objeto)
+     - error.tsx melhorado para detectar banco indisponível e exibir mensagem adequada
+
+  2. "fix: melhorar detecção de banco indisponível no error.tsx"
+     1 arquivo, 5 linhas. Ajuste pontual para capturar corretamente o erro de conexão
+     com o PostgreSQL e exibir uma mensagem amigável em vez de um stack trace.
+
+  3. "docs: adiciona README e PRD do projeto"
+     README e PRD.md criados e adicionados ao repositório — documentação formal do
+     projeto pela primeira vez no histórico de commits.
+
+  ---
+
+  2 DE ABRIL DE 2026 — O DIA DO REDESIGN COMPLETO
+  ─────────────────────────────────────────────────
+
+  O dia mais intenso de desenvolvimento após a construção inicial. Cinco commits,
+  todos no mesmo dia, cada um construindo sobre o anterior.
+
+  Commit 1 — "feat: notificação de alunos por email e melhorias no módulo de presença"
+  6 arquivos, 166 linhas.
+  Até aqui, o sistema enviava alertas automaticamente ao salvar chamada, mas não havia
+  como disparar uma notificação manualmente. Isso foi corrigido:
+  - NotificarButton.tsx: botão individual por aluno no dashboard
+  - Server action notificarAluno(id) em dashboard/actions.ts
+  - Guard adicionado no serviço de e-mail: se RESEND_API_KEY não estiver configurada,
+    o sistema loga um aviso mas não lança erro — útil em ambiente local sem chave
+  - PresencaForm recebeu turmaNome como prop e passou a exibir contadores de chamada
+    em tempo real enquanto o admin preenche (quantos presentes, ausentes, atrasados)
+
+  Commit 2 — "feat: aplica design Stitch — tabelas, bento grid, stats cards e sidebar"
+  8 arquivos, 539 linhas adicionadas, 279 removidas.
+  Primeira iteração do redesign visual. O sistema estava funcional mas com estética
+  genérica. Um sistema de design (Stitch) foi aplicado:
+  - Tabelas reformuladas com novo visual
+  - Cards de estatísticas no estilo bento grid
+  - Sidebar redesenhada
+
+  Commit 3 — "feat: redesign completo da UI com cores da marca e novas funcionalidades"
+  28 arquivos, 671 linhas adicionadas, 284 removidas. O commit mais abrangente do projeto.
+  Mudanças estruturais e visuais simultâneas:
+
+  Visual:
+  - Paleta de cores da marca definida via @theme inline no Tailwind (primária, secundária,
+    terciária, neutra) — cores aplicadas de forma consistente em toda a interface
+
+  Soft-delete de alunos:
+  - Decisão de produto importante: "excluir" um aluno não remove o registro do banco.
+    O status é definido como INATIVO. O histórico de presenças é preservado.
+    O aluno aparece ao fim da lista, separado dos ativos.
+    Isso resolve o problema de perder dados históricos ao desligar um aluno.
+  - O schema foi atualizado: enum StatusAluno com ATIVO, PENDENTE, INATIVO adicionado
+    ao modelo Aluno
+
+  Dashboard reformulado:
+  - Cards de métricas compactos (total de alunos, % presença, total de irregulares)
+  - Bloco de "Alunos Irregulares" com NotificarTodosButton (envio em massa) e
+    ExportIrregularesButton (PDF de todos os irregulares — novo endpoint criado:
+    /api/relatorio/irregulares/pdf)
+
+  Criação de aluno em modal:
+  - NovoAlunoModal.tsx: criar aluno sem sair da página de listagem
+  - Formulário AlunoForm revisado (inputs corrigidos, área de foto no formato 3x4)
+
+  Frequência na listagem:
+  - Situação Regular/Irregular passou a ser calculada server-side e exibida como badge
+    diretamente na tabela de alunos — sem precisar abrir o relatório individual
+
+  Commit 4 — "feat: nova turma em modal, seguindo padrão do cadastro de alunos"
+  3 arquivos, 57 linhas.
+  Padronização do fluxo: como criar aluno já era modal, criar turma foi migrado para
+  o mesmo padrão. NovaTurmaModal.tsx criado. A página /turmas/nova não é mais necessária
+  para o fluxo principal.
+
+  Commit 5 — "feat: modais para editar/relatório de turma, fix desativação de aluno
+             e ordenação por coluna"
+  10 arquivos, 430 linhas adicionadas, 102 removidas. Fechamento do dia.
+  - EditarTurmaModal.tsx: edição de turma sem sair da listagem
+  - RelatorioTurmaModal.tsx: relatório dos últimos 30 dias da turma em modal com
+    carregamento sob demanda (só busca os dados ao abrir, não recarrega em reaperturas)
+  - Soft-delete corrigido: o AlunoDeleteButton e TurmaDeleteButton estavam com problema
+    no DialogTrigger (padrão base-ui). Corrigido para funcionar consistentemente.
+  - AlunosBusca.tsx ganhou ordenação por qualquer coluna (nome, matrícula, turma,
+    status, situação) com ícones de direção (asc/desc)
+  - Dashboard compactado: card de consulta por data mais enxuto
+  - Seed atualizado com 10 alunos INATIVO para validar a funcionalidade de soft-delete
+
+  ---
+
+  3 DE ABRIL DE 2026 — EDIÇÃO DE ALUNO MIGRADA PARA MODAL
+  ─────────────────────────────────────────────────────────
+
+  "feat: editar aluno em modal, seguindo padrão de criar aluno e turma"
+  4 arquivos modificados, 1 componente criado.
+
+  A edição de aluno era o único fluxo de CRUD que ainda usava página dedicada
+  (/alunos/[id]/editar). Com todas as outras operações já em modal — criar aluno,
+  criar turma, editar turma — a inconsistência ficou evidente.
+
+  - EditarAlunoModal.tsx criado: segue exatamente o padrão do EditarTurmaModal.
+    Recebe aluno (com todos os campos de defaultValues) e turmas como props,
+    vincula editarAluno.bind(null, id), fecha via onCancel.
+  - AlunosBusca.tsx atualizado: adicionado turmaId no tipo Aluno, nova prop turmas,
+    botão de lápis que era <Link href="/alunos/[id]/editar"> substituído por
+    EditarAlunoModal. Dados já disponíveis no RSC pai — nenhuma nova query.
+  - alunos/page.tsx: turmas já buscado para NovoAlunoModal, agora passado também
+    para AlunosBusca (sem custo adicional de query).
+  - editar/page.tsx: corrigido erro de tipo pré-existente com StatusAluno INATIVO
+    sendo passado para campo que só aceita ATIVO | PENDENTE.
+
+  A página /alunos/[id]/editar continua existindo e pode ser acessada diretamente
+  por URL, mas o fluxo principal da listagem agora usa o modal.
+
+  ---
+
+  ESTADO ATUAL DO PROJETO (3 de abril de 2026)
+  ─────────────────────────────────────────────
+
+  O projeto está na branch designv2 com o seguinte conjunto de funcionalidades:
+
+  Módulo de Turmas
+    Listagem vertical com turno, ano letivo e contagem de alunos
+    Criar, editar e excluir via modal (sem navegação de página)
+    Relatório de 30 dias por turma acessível via modal sob demanda
+    Exclusão bloqueada se houver alunos vinculados
+
+  Módulo de Alunos
+    Listagem com busca client-side e ordenação por qualquer coluna
+    Badge de frequência (Regular/Irregular) calculado no servidor
+    Criar e editar via modal (sem navegação de página)
+    Soft-delete: aluno inativo preserva histórico, vai ao fim da lista
+    Upload de foto com rollback automático em caso de falha
+
+  Registro de Chamada
+    Toggle de status por aluno (Presente/Ausente/Atrasado)
+    Contadores em tempo real durante o preenchimento
+    Pré-preenchimento para correção de chamadas passadas
+    Apenas alunos ativos aparecem na chamada
+
+  Dashboard
+    Cards de métricas (presença do dia, irregulares)
+    Resumo visual por turma
+    Notificação individual e em massa de responsáveis
+    Exportação em PDF da lista de irregulares
+
+  Relatório Individual
+    Calendário visual mensal com bolinhas por status
+    Exportação em PDF e CSV
+
+  Notificações
+    Automática ao salvar chamada que cruza o limiar
+    Manual individual (botão por aluno)
+    Manual em massa (todos os irregulares de uma vez)
+    Controle de reenvio via flag alertaEnviado
+
+  ---
+
+  LINHA DO TEMPO RESUMIDA
+
+  16 mar 2026 — Projeto criado do zero. Fases 1 a 9 implementadas em um dia.
+               Infraestrutura, banco, auth, turmas, alunos, presenças, e-mail,
+               dashboard, relatório e exportação.
+
+  23 mar 2026 — Fase 10: página de detalhe de turma, melhorias de busca e ajustes de UX.
+
+  30 mar 2026 — Feedbacks visuais e reatividade no formulário de chamada.
+
+  31 mar 2026 — Calendário de presenças, refatoração da frequência, melhoria dos
+               tratamentos de erro. Primeira documentação formal (README e PRD).
+
+  02 abr 2026 — Dia de redesign e expansão de funcionalidades: notificação manual,
+               soft-delete de alunos (StatusAluno), redesign visual completo com
+               paleta de marca, criação/edição de turmas via modal, relatório de
+               turma em modal, ordenação de tabelas, contadores em tempo real na chamada.
+
+  03 abr 2026 — Edição de aluno migrada para modal (EditarAlunoModal), completando
+               o padrão modal-first para todos os fluxos de CRUD da listagem.
+
+  Total de commits: 23
+  Total de linhas de código adicionadas: ~8.700+
+  Arquivos no projeto (excluindo node_modules): ~62 arquivos de código
+
+  ---
+
+  DECISÕES TÉCNICAS QUE MERECEM REGISTRO
+
+  Por que dois arquivos de auth? (auth.config.ts e auth.ts)
+  O middleware do Next.js roda no edge runtime, que não suporta Node.js nativo.
+  O NextAuth precisa do PrismaAdapter para validar credenciais no banco, mas o Prisma
+  usa APIs Node.js. Solução: auth.config.ts tem apenas a lógica compatível com edge
+  (usado no middleware), auth.ts tem o adaptador completo (usado nas server actions).
+
+  Por que soft-delete em vez de delete real?
+  Deletar um aluno apagaria o histórico de presenças que justifica suas faltas. Em um
+  sistema escolar, esse histórico pode ser exigido posteriormente. Definir status=INATIVO
+  preserva todos os dados enquanto remove o aluno das operações do dia a dia.
+
+  Por que modais em vez de páginas para todas as operações de CRUD?
+  Fluxo mais fluido: o admin não perde o contexto da listagem ao criar ou editar.
+  Turmas (criar/editar) e alunos (criar/editar) seguem o mesmo padrão modal.
+  O AlunoForm é suficientemente compacto para funcionar bem em modal — a área de foto
+  3x4 e os campos cabem confortavelmente num Dialog com scroll.
+
+  Por que a frequência é calculada no servidor para a listagem?
+  Evita fazer N chamadas ao banco no cliente. O RSC pai carrega todos os alunos com
+  suas presenças em uma única query, calcula a situação server-side e passa já calculado
+  para o AlunosBusca (componente client). O cliente só filtra e ordena, nunca consulta.
+
+  Por que alertaEnviado reseta ao voltar para Regular?
+  Se o flag não fosse resetado, o aluno só receberia um alerta em toda a vida escolar.
+  O comportamento correto é: notifica ao entrar em Irregular, silencia enquanto continua
+  Irregular, e pode notificar novamente se melhorar e piorar de volta.
