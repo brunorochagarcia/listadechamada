@@ -49,3 +49,6 @@ next-env.d.ts
 
 # IDE
 .idea/
+
+# user uploads (dynamic files, not versioned)
+/public/uploads/

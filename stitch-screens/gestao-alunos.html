@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#f9f9f9",
+              "tertiary-container": "#ff8634",
+              "tertiary": "#9a4600",
+              "error-container": "#ffdad6",
+              "secondary": "#5a5f65",
+              "on-error": "#ffffff",
+              "tertiary-fixed-dim": "#ffb68c",
+              "on-primary-container": "#004060",
+              "surface-container-low": "#f3f3f3",
+              "primary": "#006493",
+              "inverse-primary": "#8ccdff",
+              "surface-container-lowest": "#ffffff",
+              "outline": "#6f7880",
+              "surface-bright": "#f9f9f9",
+              "secondary-fixed": "#dee3ea",
+              "on-tertiary-fixed": "#321200",
+              "on-error-container": "#93000a",
+              "surface": "#f9f9f9",
+              "surface-variant": "#e2e2e2",
+              "surface-tint": "#006493",
+              "on-primary-fixed-variant": "#004b70",
+              "on-primary-fixed": "#001e2f",
+              "tertiary-fixed": "#ffdbc9",
+              "on-tertiary": "#ffffff",
+              "surface-container-highest": "#e2e2e2",
+              "on-tertiary-fixed-variant": "#763400",
+              "on-surface-variant": "#3f484f",
+              "on-secondary-fixed": "#171c21",
+              "secondary-container": "#dee3ea",
+              "on-tertiary-container": "#652b00",
+              "primary-fixed-dim": "#8ccdff",
+              "on-secondary-container": "#60656b",
+              "on-surface": "#1a1c1c",
+              "on-secondary-fixed-variant": "#42474d",
+              "on-secondary": "#ffffff",
+              "inverse-surface": "#2f3131",
+              "on-primary": "#ffffff",
+              "on-background": "#1a1c1c",
+              "error": "#ba1a1a",
+              "inverse-on-surface": "#f1f1f1",
+              "primary-container": "#54afeb",
+              "surface-container-high": "#e8e8e8",
+              "secondary-fixed-dim": "#c2c7ce",
+              "surface-container": "#eeeeee",
+              "outline-variant": "#bfc7d1",
+              "primary-fixed": "#cae6ff",
+              "surface-dim": "#dadada"
+            },
+            fontFamily: {
+              "headline": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm flex justify-between items-center px-6 h-16 z-40">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sky-500 dark:text-sky-400" data-icon="school">school</span>
+<h1 class="text-xl font-bold text-sky-500 dark:text-sky-400 font-sans antialiased">EduManage</h1>
+</div>
+<div class="cursor-pointer active:opacity-80">
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant" data-alt="Close up portrait of a smiling professional woman with neutral background and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2RA0LZpFJJwpq2mmzihAQDaKaQYQTv0Qi7bDiIFFQkdv07DVOTDnOQX_OglJVSmDXPdA-7Fa7S-H7YQ6LphVM3CJ1b6g4JAvRIX9nFw-HStdlGg8Y04m5Y4IuPO6hHNkMF_325lmz3w7DJJ9BuSGg7RSxCQbIDdG4MY-bQWarSETPce8D7TXgldAK8WE4dawh4CxFADHLfnNQAFuioqToC8XHnsRy410s_1p07EbFlZhetzhin8A3sscnHvY8ZbSznZ-dUhTo-LlF"/>
+</div>
+</header>
+<main class="flex-1 pb-24 px-4 pt-6 max-w-md mx-auto w-full overflow-y-auto">
+<!-- Search and Action Area -->
+<div class="space-y-4 mb-8">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all" placeholder="Buscar alunos..." type="text"/>
+</div>
+<button class="w-full bg-primary-container text-white font-semibold py-3.5 rounded-lg flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Adicionar Aluno
+            </button>
+</div>
+<!-- Section Title -->
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-lg font-bold text-on-surface">Lista de Alunos</h2>
+<span class="text-xs font-medium text-secondary bg-secondary-container px-2 py-1 rounded">248 Total</span>
+</div>
+<!-- Students List (Asymmetric Layout/Modern Cards) -->
+<div class="space-y-3">
+<!-- Student Card 1 -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
+<img alt="Gabriel Souza" class="w-14 h-14 rounded-lg object-cover" data-alt="Young male student portrait with a friendly expression in a bright outdoor campus environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASSBkQuWwbC-WtSdmpgBdvH-aQObA90SkY1AXLcpwITkV85_4fbtog05bJ8FQT534CVt_eLLAJxzd2cL0ifl5GXL0EZTx8lV_-482H31JlXoAMVqrRVwqskGzk0aJ4pM4uLiArO_j7Z--DJ5dBp87KMatzr0deCRhlRfMEXdGNFReVc-P6z03zeZZcMUafnUpsiMA7KDolaSVImCgIqhgRn5u9I7Yc7EzuICnxl5VktPP2Jx4RWK_eQGbFB3Taw9rzBN14AnN3AQF2"/>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface leading-tight">Gabriel Souza</h3>
+<p class="text-sm text-secondary">Matrícula: #2024001</p>
+</div>
+<button class="px-4 py-2 text-primary font-medium border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+                    Editar
+                </button>
+</div>
+<!-- Student Card 2 -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
+<img alt="Ana Luiza" class="w-14 h-14 rounded-lg object-cover" data-alt="Teenage girl student with glasses smiling warmly in a library setting with soft bookshelf background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvLt_OpGr03GrnJJoZHV9oiIlzPxrxUNQ2YuUQSra6_fsEPV5sPFao_YV4BdE0BBplDvUPx2inKrIFD40f7a1TRDpxukA3mkMc9N40-_o1Ew5QczhqX4kKXmImmURJNOAujDtT3TZ3Kc4sHJfwcJ3tALy32SxSMJzKeINeiPoPP3rtzVaTzKOisg9sBGhkzV7rNAxt3qWD-4RS-YUEj0MuQ6E5my8JcHswUqjZUMhi_605fw7x_Vp9j_IrrWRjxmzXa01VTtGdBjbh"/>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface leading-tight">Ana Luiza</h3>
+<p class="text-sm text-secondary">Matrícula: #2024042</p>
+</div>
+<button class="px-4 py-2 text-primary font-medium border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+                    Editar
+                </button>
+</div>
+<!-- Student Card 3 -->
+<div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-4">
+<div class="w-14 h-14 rounded-lg bg-surface-container flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-3xl" data-icon="person">person</span>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-on-surface leading-tight">Marcos Oliveira</h3>
+<p class="text-sm text-secondary">Matrícula: #2024015</p>
+</div>
+<button class="px-4 py-2 text-primary font-medium border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+                    Editar
+                </button>
+</div>
+</div>
+<!-- Form/Modal Style Section (Featured) -->
+<div class="mt-10 p-6 bg-white rounded-2xl border-2 border-primary-container/20 shadow-xl relative overflow-hidden">
+<div class="absolute top-0 left-0 w-2 h-full bg-primary-container"></div>
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="edit_note">edit_note</span>
+<h2 class="text-xl font-bold">Novo Registro</h2>
+</div>
+<form class="space-y-5">
+<!-- Photo Upload Area -->
+<div class="relative group">
+<label class="block text-sm font-semibold text-secondary mb-2">Foto do Aluno</label>
+<div class="w-full aspect-video border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center bg-background group-hover:bg-surface-container transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-outline mb-2" data-icon="cloud_upload">cloud_upload</span>
+<p class="text-sm text-outline font-medium">Clique para fazer upload</p>
+<p class="text-[10px] text-outline/60 mt-1">PNG, JPG até 5MB</p>
+</div>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-semibold text-secondary mb-1.5">Nome Completo</label>
+<input class="w-full px-4 py-3 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none" placeholder="Ex: Maria Santos" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-semibold text-secondary mb-1.5">Número de Matrícula</label>
+<input class="w-full px-4 py-3 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none" placeholder="Ex: 2024XXXX" type="text"/>
+</div>
+</div>
+<div class="flex gap-3 pt-4">
+<button class="flex-1 py-3 text-secondary font-semibold border border-outline-variant rounded-lg active:bg-surface-container transition-colors" type="button">
+                        Cancelar
+                    </button>
+<button class="flex-1 py-3 bg-primary-container text-white font-semibold rounded-lg shadow-md active:scale-95 transition-transform" type="submit">
+                        Salvar
+                    </button>
+</div>
+</form>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<a class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs font-medium font-sans">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-sky-500 dark:text-sky-400 bg-sky-50/50 dark:bg-sky-900/20 rounded-lg py-1 px-3 hover:text-sky-500 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-xs font-medium font-sans">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="class">class</span>
+<span class="text-xs font-medium font-sans">Classes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 transition-all active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="text-xs font-medium font-sans">Reports</span>
+</a>
+</nav>
+</body></html>

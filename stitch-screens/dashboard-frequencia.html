@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduManage - Attendance Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#f9f9f9",
+              "tertiary-container": "#ff8634",
+              "tertiary": "#9a4600",
+              "error-container": "#ffdad6",
+              "secondary": "#5a5f65",
+              "on-error": "#ffffff",
+              "tertiary-fixed-dim": "#ffb68c",
+              "on-primary-container": "#004060",
+              "surface-container-low": "#f3f3f3",
+              "primary": "#006493",
+              "inverse-primary": "#8ccdff",
+              "surface-container-lowest": "#ffffff",
+              "outline": "#6f7880",
+              "surface-bright": "#f9f9f9",
+              "secondary-fixed": "#dee3ea",
+              "on-tertiary-fixed": "#321200",
+              "on-error-container": "#93000a",
+              "surface": "#f9f9f9",
+              "surface-variant": "#e2e2e2",
+              "surface-tint": "#006493",
+              "on-primary-fixed-variant": "#004b70",
+              "on-primary-fixed": "#001e2f",
+              "tertiary-fixed": "#ffdbc9",
+              "on-tertiary": "#ffffff",
+              "surface-container-highest": "#e2e2e2",
+              "on-tertiary-fixed-variant": "#763400",
+              "on-surface-variant": "#3f484f",
+              "on-secondary-fixed": "#171c21",
+              "secondary-container": "#dee3ea",
+              "on-tertiary-container": "#652b00",
+              "primary-fixed-dim": "#8ccdff",
+              "on-secondary-container": "#60656b",
+              "on-surface": "#1a1c1c",
+              "on-secondary-fixed-variant": "#42474d",
+              "on-secondary": "#ffffff",
+              "inverse-surface": "#2f3131",
+              "on-primary": "#ffffff",
+              "on-background": "#1a1c1c",
+              "error": "#ba1a1a",
+              "inverse-on-surface": "#f1f1f1",
+              "primary-container": "#54afeb",
+              "surface-container-high": "#e8e8e8",
+              "secondary-fixed-dim": "#c2c7ce",
+              "surface-container": "#eeeeee",
+              "outline-variant": "#bfc7d1",
+              "primary-fixed": "#cae6ff",
+              "surface-dim": "#dadada"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-20">
+<header class="w-full top-0 sticky bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm flex justify-between items-center px-6 h-16 w-full z-40">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-sky-500 dark:text-sky-400" data-icon="school">school</span>
+<h1 class="text-xl font-bold text-sky-500 dark:text-sky-400">EduManage</h1>
+</div>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-surface-variant cursor-pointer active:opacity-80">
+<img alt="User profile picture" class="h-full w-full object-cover" data-alt="Close up portrait of a smiling professional school administrator in a bright office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVrn5Pbaak0ZQwUUwj9WoVMXRFBF3q3KhwxhAU8JVjqg72fZyJDX2771QYvGAycBInbAzWOi242YD4z7GKDAjuER1WMxsWY_SIXEMpoyfypk9qlCgCxkIpKT8d8fAFbrGu49N9cjSQA92S4HC2pe7evBibPIVxUYNkXguzE-prd7FE2OQt0eub54R3-ANFLNDgC9uBASs5zpyDTAKsQzxkXtDvXu_iDwGu9OJZIHUuTsOPBQxUoJiqEjnM5iCVyK0z_uvLBCWH9S5I"/>
+</div>
+</header>
+<main class="px-4 py-6 max-w-lg mx-auto">
+<div class="mb-8">
+<h2 class="text-2xl font-extrabold tracking-tight text-on-surface">Dashboard</h2>
+<p class="text-secondary text-sm">Resumo de frequência de hoje</p>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-8">
+<div class="col-span-2 bg-surface-container-lowest p-5 rounded-xl border border-surface-variant shadow-sm flex items-center justify-between">
+<div>
+<p class="text-secondary text-xs font-semibold uppercase tracking-wider">Total Students</p>
+<p class="text-3xl font-bold text-on-surface">1,284</p>
+</div>
+<div class="bg-primary-container/10 p-3 rounded-lg text-primary-container">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</div>
+</div>
+<div class="bg-primary-container p-5 rounded-xl shadow-sm text-white">
+<p class="text-white/80 text-xs font-semibold uppercase tracking-wider">Attendance %</p>
+<div class="flex items-baseline gap-1 mt-1">
+<p class="text-3xl font-bold">94.2%</p>
+<span class="text-xs font-medium text-white/90">↑ 2%</span>
+</div>
+</div>
+<div class="bg-error-container p-5 rounded-xl shadow-sm text-on-error-container">
+<p class="text-on-error-container/70 text-xs font-semibold uppercase tracking-wider">Irregular</p>
+<div class="flex items-baseline gap-1 mt-1">
+<p class="text-3xl font-bold">12</p>
+<span class="text-xs font-medium text-error">Critical</span>
+</div>
+</div>
+</div>
+<section class="mb-8">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-on-surface">Alunos em Situação Irregular</h3>
+<span class="text-primary text-xs font-semibold">Ver todos</span>
+</div>
+<div class="space-y-3">
+<div class="bg-white p-4 rounded-lg border border-surface-variant flex items-center justify-between">
+<div class="flex items-center gap-4">
+<img alt="Student" class="w-12 h-12 rounded-lg object-cover" data-alt="Cheerful young student girl with braided hair wearing a school sweater in a classroom setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2ul_LfQyFe8JxdbD9SV3V_iwoQBAxaEsaMMzcmGSIcJZiPojZAtsKCyM1HNMQHYqXbQuui6_Kr_ngG1rhAYy7dfXf_GLaPCMLHjwdBzRaoXRJ6fO9I00w12QoU6lLMmVW6I-yk3dU1jWY9u_P0Tc73Keaz9lv1ZzNYyLHMYDUeiIb1QVerHpG9rkhirzkn4SOXqfUh8dgazDOeLiXR_FgxUikmAp_BYf5uvD6WwbEAU2Thcw3YZN9XEwTLwKr1jK1Nvbp34Fkns56"/>
+<div>
+<p class="font-bold text-on-surface">Ana Silva</p>
+<p class="text-xs text-error font-medium">68% de frequência</p>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container/90 transition-colors active:opacity-80">
+                        Notificar
+                    </button>
+</div>
+<div class="bg-white p-4 rounded-lg border border-surface-variant flex items-center justify-between">
+<div class="flex items-center gap-4">
+<img alt="Student" class="w-12 h-12 rounded-lg object-cover" data-alt="Young high school boy with short curly hair looking thoughtful, soft educational lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByBBaoMoVBnUjHtallwxqWZPc3P18o7ZYolNRsTslNdCuXK3thoRXxTTIhxHlAmoKAETwMwe8rJaqHsA7OvaLYQ0mT4_WWQ4DHofX2yNSoKGHqKW7wl7u1Y1gtzNn4WYrdSa13UqoiCoG-lUqQJnZ_OYUAtXKzddaK4xYJtkss-ZMcQpEh_zHDkjx5Ibi_yHgRm-hY4ociWy80w6mJ7YcDIsLNm5AVyRV78PEC2wRAkFRNYUUyOMNNKS6FSbESBJDP9qihIgUnpX1O"/>
+<div>
+<p class="font-bold text-on-surface">Lucas Santos</p>
+<p class="text-xs text-error font-medium">72% de frequência</p>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container/90 transition-colors active:opacity-80">
+                        Notificar
+                    </button>
+</div>
+<div class="bg-white p-4 rounded-lg border border-surface-variant flex items-center justify-between">
+<div class="flex items-center gap-4">
+<img alt="Student" class="w-12 h-12 rounded-lg object-cover" data-alt="Young student with glasses smiling warmly, bright natural light in a library background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1R8VRPS5s-UaM0rngeAZZbPBl74Z-y0wJ7eq9SC7sNyIub5cLCOIL38pnuzbZ_Dga4RdGS9elkiKlYU_NyzFlX02HBUki5l3otC85Yn_Z03wuZx4W5bq8Qbp2zZHJf53mqbHOcGq-MgrVOPpn9hDtsrsOw3_x9EmNKv1LELOySOBK8hLBDTX4IdS0-r6Fb8n6zEVrRmV8Dxig3Phg63X1W4YQYtIt68ToM3slvk-N38FIip7Cpxs-ZcKRU71_5s52w0xHcz1L58jH"/>
+<div>
+<p class="font-bold text-on-surface">Carla Mendes</p>
+<p class="text-xs text-error font-medium">64% de frequência</p>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-container/90 transition-colors active:opacity-80">
+                        Notificar
+                    </button>
+</div>
+</div>
+</section>
+<section class="bg-surface-container rounded-xl p-6 border border-dashed border-outline-variant text-center">
+<span class="material-symbols-outlined text-4xl text-secondary/30 mb-2" data-icon="assessment">assessment</span>
+<p class="text-on-surface font-semibold">Gere relatórios detalhados</p>
+<p class="text-secondary text-xs mb-4">Analise o desempenho por turma ou período.</p>
+<button class="w-full bg-white border border-outline-variant py-3 rounded-lg text-sm font-bold text-on-surface hover:bg-surface-bright transition-colors">
+                Exportar PDF
+            </button>
+</section>
+</main>
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] rounded-t-lg">
+<a class="flex flex-col items-center justify-center text-sky-500 dark:text-sky-400 bg-sky-50/50 dark:bg-sky-900/20 rounded-lg py-1 px-3 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs font-medium font-sans mt-0.5">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-xs font-medium font-sans mt-0.5">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="class">class</span>
+<span class="text-xs font-medium font-sans mt-0.5">Classes</span>
+</a>
+<a class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 active:scale-95 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="text-xs font-medium font-sans mt-0.5">Reports</span>
+</a>
+</nav>
+</body></html>

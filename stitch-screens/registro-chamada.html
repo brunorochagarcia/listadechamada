@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduManage - Registro de Frequência</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#f9f9f9",
+              "tertiary-container": "#ff8634",
+              "tertiary": "#9a4600",
+              "error-container": "#ffdad6",
+              "secondary": "#53585e",
+              "on-error": "#ffffff",
+              "tertiary-fixed-dim": "#ffb68c",
+              "on-primary-container": "#004060",
+              "surface-container-low": "#f3f3f3",
+              "primary": "#006493",
+              "inverse-primary": "#8ccdff",
+              "surface-container-lowest": "#ffffff",
+              "outline": "#6f7880",
+              "surface-bright": "#f9f9f9",
+              "secondary-fixed": "#dee3ea",
+              "on-tertiary-fixed": "#321200",
+              "on-error-container": "#93000a",
+              "surface": "#f9f9f9",
+              "surface-variant": "#e2e2e2",
+              "surface-tint": "#006493",
+              "on-primary-fixed-variant": "#004b70",
+              "on-primary-fixed": "#001e2f",
+              "tertiary-fixed": "#ffdbc9",
+              "on-tertiary": "#ffffff",
+              "surface-container-highest": "#e2e2e2",
+              "on-tertiary-fixed-variant": "#763400",
+              "on-surface-variant": "#3f484f",
+              "on-secondary-fixed": "#171c21",
+              "secondary-container": "#dee3ea",
+              "on-tertiary-container": "#652b00",
+              "primary-fixed-dim": "#8ccdff",
+              "on-secondary-container": "#60656b",
+              "on-surface": "#1a1c1c",
+              "on-secondary-fixed-variant": "#42474d",
+              "on-secondary": "#ffffff",
+              "inverse-surface": "#2f3131",
+              "on-primary": "#ffffff",
+              "on-background": "#1a1c1c",
+              "error": "#ba1a1a",
+              "inverse-on-surface": "#f1f1f1",
+              "primary-container": "#54afeb",
+              "surface-container-high": "#e8e8e8",
+              "secondary-fixed-dim": "#c2c7ce",
+              "surface-container": "#eeeeee",
+              "outline-variant": "#bfc7d1",
+              "primary-fixed": "#cae6ff",
+              "surface-dim": "#dadada"
+            },
+            fontFamily: {
+              "headline": ["Inter", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .segmented-control input:checked + label {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface selection:bg-primary-container/30">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-sm z-40 flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-3 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-sky-500 dark:text-sky-400" data-icon="school">school</span>
+<h1 class="text-xl font-bold text-sky-500 dark:text-sky-400 font-sans antialiased">EduManage</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User profile picture" class="w-full h-full object-cover" data-alt="professional headshot of a teacher with a friendly smile in a bright school hallway" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcdqvXJiVhdmVD-A-KJdZWsURitgFR6AoI9r4BB70Y9ylQ6rfLPOQSUrcxcrgTVvvDDxlhLbZdsCF7pIoog6imOsUTZd-Ibul6ECCmnWgfbvLzgAjvm0grYRdGQ4-_LHqZd3jCI3K3s7KT59uyTDb95vW_DjjVC4yguPsWBUrBLuqcsrTEEEdG_PWYB6ioJsdjkPhQZHcN8AC3oukQb0lvVQD3Kb0IrwpWsDK69mTMUsIj3o1oPawTf6kMqlmJKVnvvZkUgkPu0YpL"/>
+</div>
+</div>
+</header>
+<main class="pb-32 max-w-lg mx-auto px-4">
+<!-- Sub Header: Class & Date Selection -->
+<section class="py-6 space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<span class="text-xs font-semibold uppercase tracking-wider text-secondary/70">Turma Selecionada</span>
+<h2 class="text-2xl font-bold text-on-surface">Turma 101</h2>
+</div>
+<div class="bg-white p-3 rounded-xl shadow-sm border border-surface-container flex items-center gap-2 cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="calendar_today">calendar_today</span>
+<span class="font-medium text-sm">24 Out 2023</span>
+</div>
+</div>
+<!-- Stats Overview -->
+<div class="grid grid-cols-3 gap-3">
+<div class="bg-green-50 p-3 rounded-lg border border-green-100">
+<p class="text-[10px] uppercase font-bold text-green-700">Presentes</p>
+<p class="text-xl font-bold text-green-800">22</p>
+</div>
+<div class="bg-red-50 p-3 rounded-lg border border-red-100">
+<p class="text-[10px] uppercase font-bold text-red-700">Ausentes</p>
+<p class="text-xl font-bold text-red-800">2</p>
+</div>
+<div class="bg-amber-50 p-3 rounded-lg border border-amber-100">
+<p class="text-[10px] uppercase font-bold text-amber-700">Atrasados</p>
+<p class="text-xl font-bold text-amber-800">1</p>
+</div>
+</div>
+</section>
+<!-- Student List -->
+<section class="space-y-3">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-semibold text-secondary">Lista de Alunos</h3>
+<span class="text-xs text-secondary/60">25 Alunos Total</span>
+</div>
+<!-- Student Card 1 -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-surface-container space-y-4">
+<div class="flex items-center gap-3">
+<img alt="Student 1" class="w-10 h-10 rounded-full object-cover" data-alt="close-up portrait of a young girl student smiling outdoors in school uniform" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdGNbgqKrHQZTAU9AOXZ7JlHbzsCEaE9fQUz57A1IH1tG4diP49ybFewTcrP7-pQlHmvfLx8hwD-D0oYrj6z-6JQgrEmo0TrXAVCpRJ3IfvbcLjieYTFMFbWIjiFcjYRGuGclOFbyu2K2y4BG0Q_MFzQYj1dPzMfxbjDAs71MzDfpY1tSVOwU_-kKHu171M1Jy2SESsCUCi57I0KeKPQlK4y2lt_9flCg7ru4nNsrq8uo1dOl32hpErlIV2eJRI3F0cwjyHMKpSgVB"/>
+<div>
+<p class="font-semibold text-on-surface">Alice Martins Silva</p>
+<p class="text-xs text-secondary">Chamada #01</p>
+</div>
+</div>
+<div class="bg-surface-container rounded-lg p-1 flex segmented-control">
+<input checked="" class="hidden" id="s1-p" name="student1" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-green-700 border border-transparent" for="s1-p">Presente</label>
+<input class="hidden" id="s1-a" name="student1" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-red-600 border border-transparent" for="s1-a">Ausente</label>
+<input class="hidden" id="s1-t" name="student1" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-amber-600 border border-transparent" for="s1-t">Atrasado</label>
+</div>
+</div>
+<!-- Student Card 2 -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-surface-container space-y-4">
+<div class="flex items-center gap-3">
+<img alt="Student 2" class="w-10 h-10 rounded-full object-cover" data-alt="portrait of a young boy student with glasses smiling in a classroom setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbInWYsXI-PWf-hIaZ2RWJA3LhiCmDT1FsWoC7Guv6xmhMXOhw81ANAoVEkZ7oRkoQDQNB03YIOejM4X2nltJje01Gc3pYzSkf7_yeGscSKyRg5cvXfzo-EdtYVMPmO0lSVy61w4_E8e25SvKzgH0nYVLpESF8tMHotnIQ9zEeD2Qwckh2Oa5tWyd8VhhEDbbbt47qBdystheC6eCeBRy5qQ4C7f0rwMrmYnTs1gn49hrX46wmux9dgt6cD1VtMB5ibG1kbekIZ1tw"/>
+<div>
+<p class="font-semibold text-on-surface">Bruno Oliveira Santos</p>
+<p class="text-xs text-secondary">Chamada #02</p>
+</div>
+</div>
+<div class="bg-surface-container rounded-lg p-1 flex segmented-control">
+<input class="hidden" id="s2-p" name="student2" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-green-700 border border-transparent" for="s2-p">Presente</label>
+<input checked="" class="hidden" id="s2-a" name="student2" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-red-600 border border-transparent" for="s2-a">Ausente</label>
+<input class="hidden" id="s2-t" name="student2" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-amber-600 border border-transparent" for="s2-t">Atrasado</label>
+</div>
+</div>
+<!-- Student Card 3 -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-surface-container space-y-4">
+<div class="flex items-center gap-3">
+<img alt="Student 3" class="w-10 h-10 rounded-full object-cover" data-alt="close-up portrait of a cheerful teenage girl student with curly hair in library" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoA3Szv3P1A2p61eVJJ_A8kcnKuyUk0fUUhYcO71UvL2aB8cUGu0-6IXFu0o6pWHyPa0j8c2kMgS3vFIM2LCI_o8bNTiZ8n4VTcQ79tR_JIb9txhsk9xTAyQSVh1e5urr37p8HYwKEs7utEIdxjZF5myffwQIXFZLtJEOLHJPrpswPBjJw0Qc6jsWlA09lHrImclU4Ce1DKX6oGj6Is7_fcErF9I1gjzmimgIbSlW7IIMQ0y5AKWlEaTC6IpiWicdVrIJuIdez7ju3"/>
+<div>
+<p class="font-semibold text-on-surface">Clara Costa Lima</p>
+<p class="text-xs text-secondary">Chamada #03</p>
+</div>
+</div>
+<div class="bg-surface-container rounded-lg p-1 flex segmented-control">
+<input class="hidden" id="s3-p" name="student3" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-green-700 border border-transparent" for="s3-p">Presente</label>
+<input class="hidden" id="s3-a" name="student3" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-red-600 border border-transparent" for="s3-a">Ausente</label>
+<input checked="" class="hidden" id="s3-t" name="student3" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-amber-600 border border-transparent" for="s3-t">Atrasado</label>
+</div>
+</div>
+<!-- Student Card 4 -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-surface-container space-y-4">
+<div class="flex items-center gap-3">
+<img alt="Student 4" class="w-10 h-10 rounded-full object-cover" data-alt="portrait of a young teenage boy student laughing outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDizVSSVhrOpPRvGgZ9Zem0Z9JIZMZXVSsUCF_YClkrpKgKKWNecOA47lc2kfbWefFL_kbY-IaZfcc3WVIFL0TaUvZG2EjVJJvILBxEjRMnlgtpFZO03wcBlr-j07hbrtp07m3zrs2w8WZc3Mu8zKoE4xdJpvOcxVIY4KuK_6HgKov_pDE10x4yVZ1e68-ANjupt9UkFd7_baXDk6ia-PrYe7gLmGnGNDSLNYwAtyZo257hYhMp1hsesie2Ik9dMWvP7dppdJ1hrfBS"/>
+<div>
+<p class="font-semibold text-on-surface">Daniel Rocha Mendes</p>
+<p class="text-xs text-secondary">Chamada #04</p>
+</div>
+</div>
+<div class="bg-surface-container rounded-lg p-1 flex segmented-control">
+<input checked="" class="hidden" id="s4-p" name="student4" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-green-700 border border-transparent" for="s4-p">Presente</label>
+<input class="hidden" id="s4-a" name="student4" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-red-600 border border-transparent" for="s4-a">Ausente</label>
+<input class="hidden" id="s4-t" name="student4" type="radio"/>
+<label class="flex-1 text-center py-2 text-xs font-semibold rounded-md transition-all cursor-pointer text-amber-600 border border-transparent" for="s4-t">Atrasado</label>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Area -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-white/80 backdrop-blur-md border-t border-gray-100 z-50 md:hidden">
+<button class="w-full py-4 bg-primary-container text-white font-bold rounded-xl shadow-lg shadow-sky-200 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+            Salvar Chamada
+        </button>
+</div>
+<!-- BottomNavBar (Shared Component) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] rounded-t-lg hidden">
+<div class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs font-medium font-sans">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-sky-500 dark:text-sky-400 bg-sky-50/50 dark:bg-sky-900/20 rounded-lg py-1 px-3 hover:text-sky-500 transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-xs font-medium font-sans">Students</span>
+</div>
+<div class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="class">class</span>
+<span class="text-xs font-medium font-sans">Classes</span>
+</div>
+<div class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-1 px-3 hover:text-sky-500 transition-all active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+<span class="text-xs font-medium font-sans">Reports</span>
+</div>
+</nav>
+</body></html>
